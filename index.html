@@ -270,6 +270,7 @@
         let userRole = null; 
         let studentProfile = null; 
         let adminProfile = null; // Store admin profile data
+        let firebaseInitialized = false; // Flag to check initialization status
 
         // Collection Paths
         const MOTIVATION_COLLECTION_PATH = `artifacts/${appId}/public/data/motivational_posts`;
@@ -310,9 +311,15 @@
         // --- Firebase Initialization and Auth ---
 
         try {
+            // Check if firebaseConfig is valid before initializing
+            if (!firebaseConfig || !firebaseConfig.apiKey) {
+                throw new Error("Konfigurasi Firebase tidak valid atau tidak ditemukan. Aplikasi tidak dapat dijalankan.");
+            }
+
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
+            firebaseInitialized = true; // Mark initialization as successful
 
             onAuthStateChanged(auth, async (user) => {
                 document.getElementById('role-auth-status').textContent = 'Otentikasi berhasil. Pilih peran Anda.';
@@ -329,8 +336,24 @@
             });
 
         } catch (error) {
-            console.error("Error initializing Firebase:", error);
-            document.getElementById('role-auth-status').textContent = 'Error: Gagal menginisialisasi Firebase.';
+            console.error("Firebase Initialization Error:", error);
+            // Display a more descriptive error message to the user
+            const roleSelectorContainer = document.querySelector("#role-selector > div");
+            if (roleSelectorContainer) {
+                roleSelectorContainer.innerHTML = `
+                    <div class="text-center">
+                        <i data-lucide="alert-triangle" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">Gagal Terhubung</h2>
+                        <p class="text-gray-600 mb-4">Aplikasi tidak dapat menginisialisasi koneksi ke server.</p>
+                        <div class="bg-red-50 p-3 rounded-lg text-left">
+                            <p class="text-sm font-semibold text-red-700">Detail Error:</p>
+                            <p class="text-xs text-red-600 font-mono break-all">${error.message}</p>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4">Ini biasanya terjadi jika aplikasi dijalankan di luar lingkungan yang semestinya atau jika konfigurasi Firebase tidak diatur dengan benar.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+            }
         }
         
         // --- Display Info Updaters ---
@@ -395,6 +418,10 @@
          * @param {string} role 'student' atau 'admin'
          */
         async function setRoleAndLogin(role) {
+            if (!firebaseInitialized) {
+                showCustomModal('Error Konfigurasi', 'Firebase tidak berhasil diinisialisasi. Aplikasi tidak dapat berfungsi. Silakan segarkan halaman.');
+                return;
+            }
             if (!isAuthReady) {
                 showCustomModal('Autentikasi Belum Siap', 'Mohon tunggu sebentar hingga otentikasi selesai.');
                 return;
@@ -1025,5 +1052,4 @@
     </script>
 </body>
 </html>
-
 

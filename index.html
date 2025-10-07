@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Konseling Siswa & Admin BK (Lokal)</title>
+    <title>Aplikasi Konseling BK (Penyimpanan Lokal)</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Lucide Icons -->
@@ -15,20 +15,13 @@
             background-color: #f7f7f7;
         }
         /* Styling untuk scrollbar yang lebih halus */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #cbd5e1;
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background-color: #f1f5f9;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background-color: #f1f5f9; }
+        
         /* Efek klik pada tombol */
-        .btn-primary:active, .btn-secondary:active {
-            transform: scale(0.98);
-        }
+        .btn-primary:active, .btn-secondary:active { transform: scale(0.98); }
+        
         /* Warna status janji temu */
         .status-Pending { @apply bg-yellow-100 text-yellow-800; }
         .status-Confirmed { @apply bg-green-100 text-green-800; }
@@ -36,21 +29,16 @@
         .status-Completed { @apply bg-blue-100 text-blue-800; }
 
         /* Styling spesifik untuk chat */
-        .chat-message-user {
-            @apply bg-blue-500 text-white self-end rounded-bl-xl rounded-t-xl;
-        }
-        .chat-message-bk {
-            @apply bg-gray-200 text-gray-800 self-start rounded-br-xl rounded-t-xl;
-        }
+        .chat-message-user { @apply bg-blue-500 text-white self-end rounded-bl-xl rounded-t-xl; }
+        .chat-message-bk { @apply bg-gray-200 text-gray-800 self-start rounded-br-xl rounded-t-xl; }
+        
         /* Style untuk Role Selector */
-        #role-selector {
-            background: linear-gradient(135deg, #4F46E5 0%, #1E40AF 100%);
-        }
+        #role-selector { background: linear-gradient(135deg, #4F46E5 0%, #1E40AF 100%); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Screen 1: Role Selector (Simulasi Login) -->
+    <!-- Screen 1: Role Selector -->
     <div id="role-selector" class="absolute inset-0 z-50 flex items-center justify-center p-4">
         <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
             <i data-lucide="shield-check" class="w-12 h-12 text-blue-600 mx-auto mb-4"></i>
@@ -59,24 +47,28 @@
             
             <button onclick="setRoleAndLogin('student')" class="btn-primary w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition duration-150 mb-4 flex items-center justify-center space-x-2">
                 <i data-lucide="user" class="w-5 h-5"></i>
-                <span>login siswa</span>
+                <span>Login Siswa</span>
             </button>
             
-            <button onclick="setRoleAndLogin('admin')" class="btn-secondary w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition duration-150 flex items-center justify-center space-x-2">
+            <button onclick="setRoleAndLogin('gurubk')" class="btn-secondary w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition duration-150 mb-4 flex items-center justify-center space-x-2">
                 <i data-lucide="graduation-cap" class="w-5 h-5"></i>
-                <span>Saya Guru BK (ADMIN)</span>
+                <span>Login Guru BK</span>
             </button>
-            <p id="role-auth-status" class="text-xs text-gray-500 mt-4">Mode Lokal: Data tidak disimpan permanen.</p>
+
+            <button onclick="setRoleAndLogin('admin')" class="btn-secondary w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-900 transition duration-150 mt-4 flex items-center justify-center space-x-2">
+                <i data-lucide="server" class="w-5 h-5"></i>
+                <span>Login Admin Pengelola</span>
+            </button>
+            <p id="role-auth-status" class="text-xs text-gray-500 mt-4">Mode Lokal: Data disimpan di browser.</p>
         </div>
     </div>
     
-    <!-- Screen 1.5: Student Data Form -->
+    <!-- Data Forms for First Time Users -->
     <div id="student-data-form" class="absolute inset-0 z-40 flex items-center justify-center p-4 bg-gray-100 hidden">
         <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full">
-            <i data-lucide="file-text" class="w-12 h-12 text-blue-600 mx-auto mb-4"></i>
+             <i data-lucide="file-text" class="w-12 h-12 text-blue-600 mx-auto mb-4"></i>
             <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Lengkapi Data Diri Siswa</h2>
             <p class="text-gray-600 mb-8 text-center">Silakan isi data berikut untuk melanjutkan.</p>
-            
             <form id="student-info-form">
                 <div class="mb-4">
                     <label for="student-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
@@ -91,66 +83,71 @@
                     <input type="text" id="student-major" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: IPA / IPS / SMK RPL">
                 </div>
                 <button type="submit" class="btn-primary w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition duration-150 flex items-center justify-center space-x-2">
-                    <i data-lucide="arrow-right-circle" class="w-5 h-5"></i>
-                    <span>Lanjutkan ke Aplikasi</span>
+                    <i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>Lanjutkan ke Aplikasi</span>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Screen 1.6: Admin Data Form (Baru) -->
-    <div id="admin-data-form" class="absolute inset-0 z-40 flex items-center justify-center p-4 bg-gray-100 hidden">
+    <div id="gurubk-data-form" class="absolute inset-0 z-40 flex items-center justify-center p-4 bg-gray-100 hidden">
         <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full">
             <i data-lucide="user-cog" class="w-12 h-12 text-green-600 mx-auto mb-4"></i>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Lengkapi Data Admin</h2>
-            <p class="text-gray-600 mb-8 text-center">Isi data profil Guru BK Anda.</p>
-            
-            <form id="admin-info-form">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Lengkapi Data Guru BK</h2>
+            <p class="text-gray-600 mb-8 text-center">Isi data profil Anda.</p>
+            <form id="gurubk-info-form">
                 <div class="mb-4">
-                    <label for="admin-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Admin</label>
-                    <input type="text" id="admin-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Contoh: Ibu S.Pd">
+                    <label for="gurubk-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="gurubk-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Contoh: Ibu S.Pd">
                 </div>
                 <div class="mb-6">
-                    <label for="admin-phone" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
-                    <input type="tel" id="admin-phone" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Contoh: 081234567890">
+                    <label for="gurubk-phone" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
+                    <input type="tel" id="gurubk-phone" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Contoh: 081234567890">
                 </div>
                 <button type="submit" class="btn-primary w-full bg-green-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-700 transition duration-150 flex items-center justify-center space-x-2">
-                    <i data-lucide="arrow-right-circle" class="w-5 h-5"></i>
-                    <span>Masuk ke Panel Admin</span>
+                    <i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>Masuk ke Panel Guru BK</span>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="admin-data-form" class="absolute inset-0 z-40 flex items-center justify-center p-4 bg-gray-100 hidden">
+        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full">
+            <i data-lucide="server-cog" class="w-12 h-12 text-slate-800 mx-auto mb-4"></i>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Lengkapi Data Admin</h2>
+            <p class="text-gray-600 mb-8 text-center">Isi nama admin pengelola.</p>
+            <form id="admin-info-form">
+                <div class="mb-6">
+                    <label for="admin-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Admin</label>
+                    <input type="text" id="admin-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-slate-500 focus:border-slate-500" placeholder="Contoh: Pengelola Sistem">
+                </div>
+                <button type="submit" class="btn-primary w-full bg-slate-800 text-white font-bold py-3 px-4 rounded-xl hover:bg-slate-900 transition duration-150 flex items-center justify-center space-x-2">
+                    <i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>Masuk ke Panel Admin</span>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Screen 2: Student/Admin App (Hidden until role selected) -->
+
+    <!-- Main App Container -->
     <div id="main-app-container" class="flex flex-1 hidden">
-
-        <!-- Header / Navigasi Mobile (Bawah) -->
         <nav id="mobile-nav" class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-lg z-20 md:hidden"></nav>
-
-        <!-- Sidebar / Navigasi Desktop -->
         <aside id="desktop-nav" class="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 p-4 shadow-md"></aside>
 
         <!-- Content Area -->
         <main class="flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-y-auto">
-            <div id="loading-indicator" class="text-center p-10 text-lg text-blue-600 hidden">Memuat aplikasi...</div>
             
-            <!-- Tampilan yang akan di-switch berdasarkan peran -->
+            <!-- Student View -->
             <div id="student-view" class="h-full w-full hidden">
                 <!-- Tab: Materi Motivasi -->
                 <div id="tab-materi" class="tab-content hidden">
                     <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Materi Motivasi Diri</h2>
                     <p class="text-gray-600 mb-8">Temukan inspirasi harian dan tips untuk meningkatkan potensi diri Anda di sini.</p>
-                    <div id="motivational-posts-list" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        <!-- Postingan akan dimuat di sini -->
-                    </div>
+                    <div id="motivational-posts-list" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
                 </div>
 
                 <!-- Tab: Janji Temu BK -->
                 <div id="tab-appointment" class="tab-content hidden">
                     <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Jadwalkan Janji Temu BK</h2>
-
-                    <!-- Form Janji Temu -->
                     <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
                         <h3 class="text-xl font-semibold text-gray-700 mb-4">Buat Janji Baru</h3>
                         <form id="appointment-form">
@@ -159,35 +156,28 @@
                                 <input type="date" id="appointment-date" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div class="mb-4">
-                                <label for="appointment-time" class="block text-sm font-medium text-gray-700 mb-1">Waktu (Contoh: 10:00)</label>
+                                <label for="appointment-time" class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
                                 <input type="time" id="appointment-time" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                             </div>
                             <div class="mb-6">
                                 <label for="appointment-reason" class="block text-sm font-medium text-gray-700 mb-1">Alasan Singkat Konseling</label>
-                                <textarea id="appointment-reason" rows="3" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: Kesulitan dalam mengatur waktu belajar..."></textarea>
+                                <textarea id="appointment-reason" rows="3" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: Kesulitan mengatur waktu belajar..."></textarea>
                             </div>
-                            <button type="submit" class="btn-primary w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition duration-150">
-                                Kirim Permintaan Janji Temu
-                            </button>
+                            <button type="submit" class="btn-primary w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition">Kirim Permintaan</button>
                         </form>
                     </div>
-
-                    <!-- Daftar Janji Temu -->
                     <h3 class="text-2xl font-bold text-gray-800 mb-4 mt-8">Riwayat Janji Temu Anda</h3>
                     <div id="appointments-list" class="space-y-4">
-                        <!-- Daftar janji temu akan dimuat di sini -->
-                        <p id="no-appointments" class="text-gray-500 italic hidden">Belum ada janji temu yang terjadwal.</p>
+                        <p id="no-appointments" class="text-gray-500 italic hidden">Belum ada janji temu.</p>
                     </div>
                 </div>
 
                 <!-- Tab: Chat Privasi -->
                 <div id="tab-chat" class="tab-content hidden h-full flex flex-col">
                     <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Chat Privasi dengan Guru BK</h2>
-                    <p class="text-gray-600 mb-6">Semua percakapan dijamin kerahasiaannya. Guru BK akan membalas pesan Anda di sini.</p>
-
-                    <!-- Tambahan Kontak WhatsApp -->
+                    <p class="text-gray-600 mb-6">Guru BK akan membalas pesan Anda di sini.</p>
                     <div class="bg-green-50 p-4 rounded-xl shadow-md mb-6 border border-green-200">
-                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                             <div class="flex items-center">
                                 <i data-lucide="phone-call" class="w-6 h-6 text-green-600 mr-3"></i>
                                 <div>
@@ -196,47 +186,53 @@
                                 </div>
                             </div>
                             <a href="https://wa.me/6285694009155" target="_blank" class="w-full sm:w-auto bg-green-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-700 transition duration-150 flex items-center justify-center space-x-2">
-                                <i data-lucide="message-square" class="w-4 h-4"></i>
-                                <span>Chat di WhatsApp</span>
+                                <i data-lucide="message-square" class="w-4 h-4"></i><span>Chat di WhatsApp</span>
                             </a>
                         </div>
                     </div>
-                    <!-- End Tambahan Kontak WhatsApp -->
-
-                    <!-- Chat Box -->
                     <div class="flex-1 bg-white p-4 rounded-xl shadow-lg flex flex-col overflow-hidden h-[60vh] md:h-[70vh]">
-                        <!-- Area Pesan -->
-                        <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar p-2">
-                            <!-- Pesan-pesan akan dimuat di sini -->
-                        </div>
-
-                        <!-- Input Pesan -->
+                        <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar p-2"></div>
                         <form id="chat-form" class="mt-4 flex space-x-3">
-                            <input type="text" id="chat-input" required placeholder="Ketik pesan Anda di sini..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                            <button type="submit" class="btn-primary bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition duration-150 flex items-center justify-center">
-                                <i data-lucide="send" class="w-5 h-5"></i>
-                                <span class="hidden sm:inline ml-2">Kirim</span>
+                            <input type="text" id="chat-input" required placeholder="Ketik pesan Anda..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            <button type="submit" class="btn-primary bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center">
+                                <i data-lucide="send" class="w-5 h-5"></i><span class="hidden sm:inline ml-2">Kirim</span>
                             </button>
                         </form>
                     </div>
                 </div>
-            </div> <!-- End Student View -->
+            </div>
             
-            <!-- Tampilan Guru BK (Admin View) -->
-            <div id="admin-view" class="h-full w-full hidden">
-                <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Panel Admin Guru BK</h2>
+            <!-- Guru BK View -->
+            <div id="gurubk-view" class="h-full w-full hidden">
+                <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Panel Guru BK</h2>
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
-                        <i data-lucide="inbox" class="w-5 h-5 mr-2"></i>
-                        Antrean Janji Temu Masuk
+                        <i data-lucide="inbox" class="w-5 h-5 mr-2"></i>Antrean Janji Temu Masuk
                     </h3>
-                    <div id="admin-appointments-list" class="space-y-4">
-                        <p id="no-admin-appointments" class="text-gray-500 italic hidden">Tidak ada janji temu baru yang perlu dikonfirmasi.</p>
+                    <div id="gurubk-appointments-list" class="space-y-4">
+                        <p id="no-gurubk-appointments" class="text-gray-500 italic">Tidak ada janji temu baru.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Modal Kustom untuk notifikasi (Menggantikan alert()) -->
+            <!-- Admin View -->
+            <div id="admin-view" class="h-full w-full hidden">
+                 <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Dashboard Admin Pengelola</h2>
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Kolom Pengguna Terdaftar -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="users" class="w-5 h-5 mr-2"></i>Pengguna Terdaftar</h3>
+                        <div id="admin-users-list" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar"></div>
+                    </div>
+                    <!-- Kolom Semua Janji Temu -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                         <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="clipboard-list" class="w-5 h-5 mr-2"></i>Seluruh Janji Temu</h3>
+                         <div id="admin-all-appointments-list" class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar"></div>
+                    </div>
+                 </div>
+            </div>
+
+            <!-- Custom Modal -->
             <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
                     <h3 id="modal-title" class="text-xl font-bold mb-3 text-gray-800">Notifikasi</h3>
@@ -244,7 +240,6 @@
                     <button id="modal-close-btn" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Tutup</button>
                 </div>
             </div>
-
         </main>
     </div>
 
@@ -253,92 +248,92 @@
         // --- Global State & Mock Data ---
         let userRole = null; 
         let studentProfile = null; 
+        let guruBkProfile = null;
         let adminProfile = null;
         let userId = 'local_student_01'; // Static ID for local simulation
         
         const localMotivationalPosts = [
-            { id: 'post1', title: 'Kunci Sukses: Konsistensi Kecil', content: 'Kesuksesan bukanlah hasil dari tindakan besar yang jarang dilakukan, melainkan serangkaian kebiasaan kecil yang diulang setiap hari. Fokuslah pada kemajuan 1% setiap hari, bukan lompatan 100%.', author: 'BK Sekolah', createdAt: new Date() },
-            { id: 'post2', title: 'Mengatasi Prokrastinasi', content: 'Teknik "5 Menit": Mulai tugas yang Anda tunda hanya selama 5 menit. Seringkali, begitu Anda memulai, inersia akan membawa Anda untuk menyelesaikannya lebih lama.', author: 'BK Sekolah', createdAt: new Date() },
-            { id: 'post3', title: 'Pentingnya Istirahat dan Batasan', content: 'Belajar keras itu penting, tapi istirahat cerdas itu krusial. Tubuh dan pikiran Anda butuh waktu untuk memproses dan memulihkan energi. Jangan takut menetapkan batasan waktu untuk belajar.', author: 'BK Sekolah', createdAt: new Date() },
+            { id: 'post1', title: 'Kunci Sukses: Konsistensi Kecil', content: 'Kesuksesan bukanlah hasil dari tindakan besar yang jarang dilakukan, melainkan serangkaian kebiasaan kecil yang diulang setiap hari.', author: 'BK Sekolah' },
+            { id: 'post2', title: 'Mengatasi Prokrastinasi', content: 'Teknik "5 Menit": Mulai tugas yang Anda tunda hanya selama 5 menit. Seringkali, begitu Anda memulai, inersia akan membawa Anda untuk menyelesaikannya lebih lama.', author: 'BK Sekolah' },
+            { id: 'post3', title: 'Pentingnya Istirahat', content: 'Belajar keras itu penting, tapi istirahat cerdas itu krusial. Tubuh dan pikiran Anda butuh waktu untuk memproses dan memulihkan energi.', author: 'BK Sekolah' },
         ];
         
         let localAppointments = [];
         let localChatMessages = [];
         
-        // --- Utility Functions ---
+        // --- LocalStorage Persistence ---
+        function saveDataToLocalStorage() {
+            localStorage.setItem('bkApp_studentProfile', JSON.stringify(studentProfile));
+            localStorage.setItem('bkApp_guruBkProfile', JSON.stringify(guruBkProfile));
+            localStorage.setItem('bkApp_adminProfile', JSON.stringify(adminProfile));
+            localStorage.setItem('bkApp_appointments', JSON.stringify(localAppointments));
+            localStorage.setItem('bkApp_chatMessages', JSON.stringify(localChatMessages));
+        }
 
-        /** Menampilkan modal kustom sebagai pengganti alert(). */
+        function loadDataFromLocalStorage() {
+            studentProfile = JSON.parse(localStorage.getItem('bkApp_studentProfile'));
+            guruBkProfile = JSON.parse(localStorage.getItem('bkApp_guruBkProfile'));
+            adminProfile = JSON.parse(localStorage.getItem('bkApp_adminProfile'));
+            
+            const appointmentsData = JSON.parse(localStorage.getItem('bkApp_appointments')) || [];
+            localAppointments = appointmentsData.map(app => ({...app, createdAt: new Date(app.createdAt) }));
+
+            const chatData = JSON.parse(localStorage.getItem('bkApp_chatMessages')) || [];
+            localChatMessages = chatData.map(msg => ({...msg, timestamp: new Date(msg.timestamp) }));
+        }
+        
+        // --- Utility Functions ---
         function showCustomModal(title, message) {
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').innerHTML = message;
             document.getElementById('custom-modal').classList.remove('hidden');
         }
-
-        document.getElementById('modal-close-btn').onclick = () => {
-            document.getElementById('custom-modal').classList.add('hidden');
-        };
-
-        /** Fungsi untuk kembali ke layar pemilihan peran (Logout/Ganti Peran). */
-        function returnToRoleSelector() {
-            window.location.reload(); // Cara paling sederhana untuk mereset aplikasi
-        }
+        document.getElementById('modal-close-btn').onclick = () => document.getElementById('custom-modal').classList.add('hidden');
+        function returnToRoleSelector() { window.location.reload(); }
         window.returnToRoleSelector = returnToRoleSelector;
 
         // --- Display Info Updaters ---
-        function updateStudentDisplayInfo() {
-            const displayNameElement = document.getElementById('user-name-display');
-            if (displayNameElement && studentProfile && studentProfile.fullName) {
-                displayNameElement.textContent = studentProfile.fullName;
-            }
-        }
-
-        function updateAdminDisplayInfo() {
-            const displayNameElement = document.getElementById('admin-name-display');
-            if (displayNameElement && adminProfile && adminProfile.fullName) {
-                displayNameElement.textContent = adminProfile.fullName;
-            }
-        }
+        const updateDisplayInfo = () => {
+            if (userRole === 'student' && studentProfile) document.getElementById('user-name-display').textContent = studentProfile.fullName;
+            if (userRole === 'gurubk' && guruBkProfile) document.getElementById('gurubk-name-display').textContent = guruBkProfile.fullName;
+            if (userRole === 'admin' && adminProfile) document.getElementById('admin-name-display').textContent = adminProfile.fullName;
+        };
 
         // --- Role & View Management ---
-
         function proceedToApp() {
-            document.getElementById('role-selector').classList.add('hidden');
-            document.getElementById('student-data-form').classList.add('hidden');
-            document.getElementById('admin-data-form').classList.add('hidden');
+            ['role-selector', 'student-data-form', 'gurubk-data-form', 'admin-data-form'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById('main-app-container').classList.remove('hidden');
             
-            if (userRole === 'admin') {
-                document.getElementById('student-view').classList.add('hidden');
-                document.getElementById('admin-view').classList.remove('hidden');
-                loadAdminLayout();
-                updateAdminDisplayInfo();
-                renderAdminAppointments(); // Initial render for admin
-            } else {
-                document.getElementById('admin-view').classList.add('hidden');
+            ['student-view', 'gurubk-view', 'admin-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
+
+            if (userRole === 'student') {
                 document.getElementById('student-view').classList.remove('hidden');
                 loadStudentLayout();
-                updateStudentDisplayInfo();
                 loadInitialStudentData();
+            } else if (userRole === 'gurubk') {
+                document.getElementById('gurubk-view').classList.remove('hidden');
+                loadGuruBkLayout();
+                renderGuruBkAppointments();
+            } else if (userRole === 'admin') {
+                document.getElementById('admin-view').classList.remove('hidden');
+                loadAdminLayout();
+                renderAdminDashboard();
             }
             
+            updateDisplayInfo();
             document.getElementById('auth-status').textContent = `Status: Terhubung (${userRole.toUpperCase()})`;
             lucide.createIcons();
         }
 
         function setRoleAndLogin(role) {
             userRole = role;
+            let profileExists = (role === 'student' && studentProfile) || (role === 'gurubk' && guruBkProfile) || (role === 'admin' && adminProfile);
             
-            if (role === 'student' && studentProfile) {
-                proceedToApp();
-            } else if (role === 'admin' && adminProfile) {
+            if (profileExists) {
                 proceedToApp();
             } else {
                 document.getElementById('role-selector').classList.add('hidden');
-                if (role === 'student') {
-                    document.getElementById('student-data-form').classList.remove('hidden');
-                } else {
-                    document.getElementById('admin-data-form').classList.remove('hidden');
-                }
+                document.getElementById(`${role}-data-form`).classList.remove('hidden');
                 lucide.createIcons();
             }
         }
@@ -346,252 +341,146 @@
 
         // --- Navigation Logic ---
         const studentTabs = ['materi', 'appointment', 'chat'];
-        let currentTab = 'materi';
-
         function setActiveTab(tabName) {
-            currentTab = tabName;
-            
             studentTabs.forEach(tab => {
                 document.getElementById(`tab-${tab}`).classList.add('hidden');
                 document.querySelector(`#desktop-nav .tab-${tab}`)?.classList.remove('bg-blue-100', 'text-blue-700', 'font-semibold');
                 document.querySelector(`#mobile-nav .tab-${tab}`)?.classList.remove('text-blue-600');
             });
-            
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
             document.querySelector(`#desktop-nav .tab-${tabName}`)?.classList.add('bg-blue-100', 'text-blue-700', 'font-semibold');
             document.querySelector(`#mobile-nav .tab-${tabName}`)?.classList.add('text-blue-600');
-            
-            if (tabName === 'chat') setTimeout(scrollToBottom, 50);
-            
+            if (tabName === 'chat') setTimeout(() => document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight, 50);
             lucide.createIcons();
         }
         window.setActiveTab = setActiveTab;
 
         // --- Layout Loaders ---
         function loadStudentLayout() {
-            const navHtml = `
-                <div class="flex justify-around items-center h-16">
-                    <button onclick="setActiveTab('materi')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span class="text-xs mt-1">Motivasi</span></button>
-                    <button onclick="setActiveTab('appointment')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span class="text-xs mt-1">Janji Temu</span></button>
-                    <button onclick="setActiveTab('chat')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span class="text-xs mt-1">Chat Privasi</span></button>
-                </div>
-                <button onclick="returnToRoleSelector()" class="w-full bg-red-500 text-white text-xs font-medium py-2 flex items-center justify-center space-x-1"><i data-lucide="log-out" class="w-4 h-4"></i><span>Ganti Peran / Logout</span></button>`;
+            const navHtml = `<div class="flex justify-around items-center h-16"><button onclick="setActiveTab('materi')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span class="text-xs mt-1">Motivasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span class="text-xs mt-1">Janji Temu</span></button><button onclick="setActiveTab('chat')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span class="text-xs mt-1">Chat</span></button></div><button onclick="returnToRoleSelector()" class="w-full bg-red-500 text-white text-xs font-medium py-2 flex items-center justify-center space-x-1"><i data-lucide="log-out" class="w-4 h-4"></i><span>Logout</span></button>`;
             document.getElementById('mobile-nav').innerHTML = navHtml;
-            
-            const sidebarHtml = `
-                <h1 class="text-2xl font-bold text-blue-700 mb-6 flex items-center"><i data-lucide="graduation-cap" class="w-7 h-7 mr-2"></i>Sistem BK</h1>
-                <div class="flex flex-col space-y-2">
-                    <button onclick="setActiveTab('materi')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span>Materi Motivasi</span></button>
-                    <button onclick="setActiveTab('appointment')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span>Janji Temu BK</span></button>
-                    <button onclick="setActiveTab('chat')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span>Chat Privasi</span></button>
-                </div>
-                <div class="mt-auto pt-4 border-t border-gray-100">
-                    <p class="text-xs text-gray-500">Nama Siswa:</p>
-                    <p id="user-name-display" class="text-md font-semibold text-gray-800 break-words"></p>
-                    <div id="auth-status" class="mt-2 text-xs font-medium"></div>
-                    <button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i> Ganti Peran / Logout</button>
-                </div>`;
+            const sidebarHtml = `<h1 class="text-2xl font-bold text-blue-700 mb-6 flex items-center"><i data-lucide="graduation-cap" class="w-7 h-7 mr-2"></i>Sistem BK</h1><div class="flex flex-col space-y-2"><button onclick="setActiveTab('materi')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span>Materi Motivasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span>Janji Temu</span></button><button onclick="setActiveTab('chat')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span>Chat Privasi</span></button></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Siswa:</p><p id="user-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
             document.getElementById('desktop-nav').innerHTML = sidebarHtml;
-            document.getElementById('desktop-nav').classList.remove('hidden');
-            document.getElementById('mobile-nav').classList.remove('hidden');
             setActiveTab('materi');
         }
 
-        function loadAdminLayout() {
-            const navHtml = `<div class="flex justify-around items-center h-16"><div class="flex flex-col items-center p-2 text-green-600"><i data-lucide="inbox" class="w-5 h-5"></i><span class="text-xs mt-1">Janji Temu</span></div></div><button onclick="returnToRoleSelector()" class="w-full bg-red-500 text-white text-xs font-medium py-2 flex items-center justify-center space-x-1"><i data-lucide="log-out" class="w-4 h-4"></i><span>Ganti Peran / Logout</span></button>`;
-            document.getElementById('mobile-nav').innerHTML = navHtml;
-            
-            const sidebarHtml = `
-                <h1 class="text-2xl font-bold text-green-700 mb-6 flex items-center"><i data-lucide="shield-check" class="w-7 h-7 mr-2"></i>Panel BK</h1>
-                <div class="flex flex-col space-y-2"><div class="w-full text-left p-3 rounded-lg bg-green-100 text-green-700 font-semibold flex items-center space-x-2"><i data-lucide="clipboard-list" class="w-5 h-5"></i><span>Antrean Konseling</span></div></div>
-                <div class="mt-auto pt-4 border-t border-gray-100">
-                    <p class="text-xs text-gray-500">Nama Admin:</p>
-                    <p id="admin-name-display" class="text-md font-semibold text-gray-800 break-words"></p>
-                    <div id="auth-status" class="mt-2 text-xs font-medium"></div>
-                    <button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i> Ganti Peran / Logout</button>
-                </div>`;
+        function loadGuruBkLayout() {
+            const sidebarHtml = `<h1 class="text-2xl font-bold text-green-700 mb-6 flex items-center"><i data-lucide="shield-check" class="w-7 h-7 mr-2"></i>Panel BK</h1><div class="flex flex-col space-y-2"><div class="w-full text-left p-3 rounded-lg bg-green-100 text-green-700 font-semibold flex items-center space-x-2"><i data-lucide="clipboard-list" class="w-5 h-5"></i><span>Antrean Konseling</span></div></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Guru BK:</p><p id="gurubk-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
             document.getElementById('desktop-nav').innerHTML = sidebarHtml;
-            document.getElementById('desktop-nav').classList.remove('hidden');
-            document.getElementById('mobile-nav').classList.remove('hidden');
-            lucide.createIcons();
+        }
+
+        function loadAdminLayout() {
+            const sidebarHtml = `<h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center"><i data-lucide="server" class="w-7 h-7 mr-2"></i>Panel Admin</h1><div class="flex flex-col space-y-2"><div class="w-full text-left p-3 rounded-lg bg-slate-200 text-slate-800 font-semibold flex items-center space-x-2"><i data-lucide="database" class="w-5 h-5"></i><span>Pengelola Data</span></div></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Admin:</p><p id="admin-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
+            document.getElementById('desktop-nav').innerHTML = sidebarHtml;
         }
 
         // --- Data Form Handling ---
         document.getElementById('student-info-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            studentProfile = {
-                fullName: document.getElementById('student-name').value.trim(),
-                school: document.getElementById('student-school').value.trim(),
-                major: document.getElementById('student-major').value.trim()
-            };
+            studentProfile = { fullName: document.getElementById('student-name').value.trim(), school: document.getElementById('student-school').value.trim(), major: document.getElementById('student-major').value.trim(), role: 'Siswa' };
+            saveDataToLocalStorage();
             proceedToApp();
         });
 
-        document.getElementById('admin-info-form').addEventListener('submit', (e) => {
+        document.getElementById('gurubk-info-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            adminProfile = {
-                fullName: document.getElementById('admin-name').value.trim(),
-                phoneNumber: document.getElementById('admin-phone').value.trim(),
-            };
+            guruBkProfile = { fullName: document.getElementById('gurubk-name').value.trim(), phoneNumber: document.getElementById('gurubk-phone').value.trim(), role: 'Guru BK' };
+            saveDataToLocalStorage();
             proceedToApp();
         });
         
-        // --- Feature 1: Materi Motivasi ---
-        function renderMotivationalPosts() {
-            const list = document.getElementById('motivational-posts-list');
-            list.innerHTML = localMotivationalPosts.map(post => `
-                <div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500 hover:shadow-xl transition duration-200">
-                    <h4 class="text-xl font-bold text-gray-800 mb-2">${post.title}</h4>
-                    <p class="text-gray-600 mb-4 line-clamp-3">${post.content}</p>
-                    <p class="text-xs text-blue-500 font-medium">Oleh: ${post.author}</p>
-                </div>`).join('');
-        }
-
-        // --- Feature 2: Janji Temu BK ---
+        document.getElementById('admin-info-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            adminProfile = { fullName: document.getElementById('admin-name').value.trim(), role: 'Admin' };
+            saveDataToLocalStorage();
+            proceedToApp();
+        });
+        
+        // --- Student Features ---
+        const renderMotivationalPosts = () => { document.getElementById('motivational-posts-list').innerHTML = localMotivationalPosts.map(post => `<div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500 hover:shadow-xl transition duration-200"><h4 class="text-xl font-bold text-gray-800 mb-2">${post.title}</h4><p class="text-gray-600 mb-4 line-clamp-3">${post.content}</p><p class="text-xs text-blue-500 font-medium">Oleh: ${post.author}</p></div>`).join(''); };
+        
         document.getElementById('appointment-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            const newAppointment = {
-                id: `app_${Date.now()}`,
-                date: document.getElementById('appointment-date').value,
-                time: document.getElementById('appointment-time').value,
-                reason: document.getElementById('appointment-reason').value.trim(),
-                studentId: userId,
-                studentName: studentProfile.fullName,
-                status: 'Pending',
-                createdAt: new Date()
-            };
-            localAppointments.unshift(newAppointment); // Add to beginning
+            localAppointments.unshift({ id: `app_${Date.now()}`, date: document.getElementById('appointment-date').value, time: document.getElementById('appointment-time').value, reason: document.getElementById('appointment-reason').value.trim(), studentId: userId, studentName: studentProfile.fullName, status: 'Pending', createdAt: new Date() });
             renderAppointments();
+            saveDataToLocalStorage();
             showCustomModal('Sukses', 'Permintaan janji temu berhasil dikirim.');
-            document.getElementById('appointment-form').reset();
+            e.target.reset();
         });
 
-        function renderAppointments() {
-            const list = document.getElementById('appointments-list');
-            const noAppointments = document.getElementById('no-appointments');
-            
-            if (localAppointments.length === 0) {
-                list.innerHTML = '';
-                noAppointments.classList.remove('hidden');
-            } else {
-                noAppointments.classList.add('hidden');
-                list.innerHTML = localAppointments.map(app => {
-                    const formattedDate = app.date + ' Pukul ' + app.time;
-                    return `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500">
-                        <div class="flex justify-between items-start">
-                            <p class="font-bold text-gray-800 text-lg">${formattedDate}</p>
-                            <span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mt-2">Alasan: ${app.reason}</p>
-                        <p class="text-xs text-gray-400 mt-2">Diajukan: ${app.createdAt.toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p>
-                    </div>`;
-                }).join('');
-            }
-        }
-
-        // --- Feature 3: Chat Privasi ---
-        function scrollToBottom() {
-            const chatBox = document.getElementById('chat-messages');
-            if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
+        const renderAppointments = () => {
+            const list = document.getElementById('appointments-list'), noApps = document.getElementById('no-appointments');
+            const studentAppointments = localAppointments.filter(app => app.studentId === userId);
+            noApps.classList.toggle('hidden', studentAppointments.length > 0);
+            list.innerHTML = studentAppointments.map(app => `<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500"><div class="flex justify-between items-start"><p class="font-bold text-gray-800 text-lg">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-600 mt-2">Alasan: ${app.reason}</p><p class="text-xs text-gray-400 mt-2">Diajukan: ${app.createdAt.toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`).join('');
+        };
+        
         document.getElementById('chat-form').addEventListener('submit', (e) => {
             e.preventDefault();
             const chatInput = document.getElementById('chat-input');
-            const message = chatInput.value.trim();
-            if (!message) return;
-
-            localChatMessages.push({ senderId: userId, message: message, timestamp: new Date() });
+            if (!chatInput.value.trim()) return;
+            localChatMessages.push({ senderId: userId, message: chatInput.value.trim(), timestamp: new Date() });
             renderChatMessages();
-            chatInput.value = '';
-
             setTimeout(() => {
-                const bkReply = `Terima kasih atas pesan Anda. Kami akan segera memprosesnya. Mohon tunggu balasan resmi dari Guru BK.`;
-                localChatMessages.push({ senderId: 'BK_Teacher', message: bkReply, timestamp: new Date() });
+                localChatMessages.push({ senderId: 'BK_Teacher', message: `Terima kasih atas pesan Anda. Kami akan segera merespon.`, timestamp: new Date() });
                 renderChatMessages();
+                saveDataToLocalStorage();
             }, 1500);
+            chatInput.value = '';
+            saveDataToLocalStorage();
         });
 
-        function renderChatMessages() {
+        const renderChatMessages = () => {
             const list = document.getElementById('chat-messages');
             list.innerHTML = localChatMessages.map(msg => {
                 const isUser = msg.senderId === userId;
-                const formattedTime = msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                const senderName = msg.senderId === 'BK_Teacher' ? `<span class="font-bold">Guru BK</span>:` : '';
-                return `
-                    <div class="max-w-[80%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm">
-                        <p>${senderName} ${msg.message}</p>
-                        <p class="text-xs ${isUser ? 'text-blue-200' : 'text-gray-500'} text-right mt-1">${formattedTime}</p>
-                    </div>`;
+                return `<div class="max-w-[80%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm"><p>${msg.senderId === 'BK_Teacher' ? `<span class="font-bold">Guru BK</span>: ` : ''}${msg.message}</p><p class="text-xs ${isUser ? 'text-blue-200' : 'text-gray-500'} text-right mt-1">${msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`;
             }).join('');
-            scrollToBottom();
-        }
+            list.scrollTop = list.scrollHeight;
+        };
         
-        // --- Admin Features ---
-        function viewStudentChat(studentId) {
-            showCustomModal('Lihat Detail Siswa', `Ini adalah simulasi. Dalam aplikasi nyata, Anda akan membuka chat dengan siswa ID: <br><span class="font-mono font-bold text-red-600 break-all">${studentId}</span>.`);
-        }
-        window.viewStudentChat = viewStudentChat;
-        
-        function updateAppointmentStatus(docId, newStatus) {
+        // --- Guru BK Features ---
+        window.updateAppointmentStatus = (docId, newStatus) => {
             const appointment = localAppointments.find(app => app.id === docId);
             if (appointment) {
                 appointment.status = newStatus;
-                renderAdminAppointments();
-                showCustomModal('Sukses', `Status Janji Temu berhasil diperbarui menjadi **${newStatus}**.`);
+                renderGuruBkAppointments();
+                saveDataToLocalStorage();
+                showCustomModal('Sukses', `Status Janji Temu diperbarui menjadi **${newStatus}**.`);
             }
-        }
-        window.updateAppointmentStatus = updateAppointmentStatus;
+        };
 
-        function renderAdminAppointments() {
-            const list = document.getElementById('admin-appointments-list');
-            const noAppointments = document.getElementById('no-admin-appointments');
-            
-            const pendingAppointments = localAppointments.filter(app => app.status !== 'Completed').sort((a, b) => b.createdAt - a.createdAt);
+        const renderGuruBkAppointments = () => {
+            const list = document.getElementById('gurubk-appointments-list'), noApps = document.getElementById('no-gurubk-appointments');
+            const pending = localAppointments.filter(app => app.status !== 'Completed').sort((a,b) => b.createdAt - a.createdAt);
+            noApps.classList.toggle('hidden', pending.length > 0);
+            list.innerHTML = pending.map(app => `<div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm"><div class="flex justify-between items-start mb-2"><p class="font-bold text-lg text-gray-800">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-700">Oleh: <span class="font-semibold">${app.studentName}</span></p><p class="text-sm text-gray-600 mt-1">Alasan: ${app.reason}</p><div class="mt-4 pt-3 border-t border-gray-200 flex flex-wrap gap-2"><button onclick="updateAppointmentStatus('${app.id}', 'Confirmed')" class="btn-primary flex-1 bg-green-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-green-600">Konfirmasi</button><button onclick="updateAppointmentStatus('${app.id}', 'Rejected')" class="btn-primary flex-1 bg-red-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-red-600">Tolak</button><button onclick="updateAppointmentStatus('${app.id}', 'Completed')" class="btn-secondary flex-1 bg-blue-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-blue-600">Selesaikan</button></div></div>`).join('');
+            lucide.createIcons();
+        };
 
-            if (pendingAppointments.length === 0) {
-                list.innerHTML = '';
-                noAppointments.classList.remove('hidden');
-            } else {
-                noAppointments.classList.add('hidden');
-                list.innerHTML = pendingAppointments.map(app => {
-                    const formattedDate = app.date + ' Pukul ' + app.time;
-                    return `
-                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
-                        <div class="flex justify-between items-start mb-2">
-                            <p class="font-bold text-lg text-gray-800">${formattedDate}</p>
-                            <span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span>
-                        </div>
-                        <p class="text-sm text-gray-700">Oleh Siswa: <span class="font-semibold">${app.studentName}</span></p>
-                        <p class="text-xs text-gray-500">ID: <span class="font-mono">${app.studentId}</span></p>
-                        <p class="text-sm text-gray-600 mt-1">Alasan: ${app.reason}</p>
-                        <p class="text-xs text-gray-400 mt-2">Diajukan: ${app.createdAt.toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p>
-                        <button onclick="viewStudentChat('${app.studentId}')" class="w-full mt-3 text-xs bg-gray-200 text-gray-700 py-2 rounded-lg hover:bg-gray-300 flex items-center justify-center transition duration-150"><i data-lucide="message-circle" class="w-4 h-4 mr-1"></i> Lihat Chat Siswa</button>
-                        <div class="mt-4 pt-3 border-t border-gray-200 space-y-2">
-                            <p class="text-sm font-medium text-gray-700">Aksi Admin:</p>
-                            <div class="flex flex-wrap gap-2">
-                                <button onclick="updateAppointmentStatus('${app.id}', 'Confirmed')" class="btn-primary flex-1 bg-green-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-green-600">Konfirmasi</button>
-                                <button onclick="updateAppointmentStatus('${app.id}', 'Rejected')" class="btn-primary flex-1 bg-red-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-red-600">Tolak</button>
-                                <button onclick="updateAppointmentStatus('${app.id}', 'Completed')" class="btn-secondary flex-1 bg-blue-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-blue-600">Selesaikan</button>
-                            </div>
-                        </div>
-                    </div>`;
-                }).join('');
-                lucide.createIcons();
-            }
-        }
+        // --- Admin Features ---
+        const renderAdminDashboard = () => {
+            // Render Users List
+            const usersList = document.getElementById('admin-users-list');
+            let allUsers = [];
+            if (studentProfile) allUsers.push(studentProfile);
+            if (guruBkProfile) allUsers.push(guruBkProfile);
+            usersList.innerHTML = allUsers.length > 0 ? allUsers.map(user => `<div class="p-3 rounded-lg ${user.role === 'Siswa' ? 'bg-blue-50' : 'bg-green-50'} flex justify-between items-center"><div class="font-semibold text-gray-800">${user.fullName}</div><div class="text-xs font-bold ${user.role === 'Siswa' ? 'text-blue-600' : 'text-green-600'}">${user.role}</div></div>`).join('') : `<p class="text-gray-500 italic">Belum ada pengguna terdaftar.</p>`;
 
-        // --- Main Data Loader ---
+            // Render All Appointments
+            const appointmentsList = document.getElementById('admin-all-appointments-list');
+            appointmentsList.innerHTML = localAppointments.length > 0 ? localAppointments.map(app => `<div class="p-3 rounded-lg bg-gray-50 border border-gray-200"><div class="flex justify-between items-center"><p class="font-semibold text-sm">${app.studentName}</p><span class="status-${app.status} px-2 py-0.5 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-xs text-gray-500">${app.date} - ${app.time}</p></div>`).join('') : `<p class="text-gray-500 italic">Belum ada janji temu dibuat.</p>`;
+        };
+
+        // --- Initial Load ---
         function loadInitialStudentData() {
             renderMotivationalPosts();
             renderAppointments();
             renderChatMessages();
         }
 
-        // Initial setup for the view
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('main-app-container').classList.add('hidden');
+            loadDataFromLocalStorage();
             document.getElementById('role-selector').classList.remove('hidden');
             lucide.createIcons();
         });

@@ -182,7 +182,7 @@
                                 <i data-lucide="phone-call" class="w-6 h-6 text-green-600 mr-3"></i>
                                 <div>
                                     <p class="text-sm font-semibold text-green-700">Hubungi Cepat Guru BK via WhatsApp:</p>
-                                    <a href="tel:+6285694009155" class="text-lg font-bold text-green-800 hover:underline">+62 856-9400-9155</a>
+                                    <a href="tel:+6285694009155" class="text-lg font-bold text-green-800 hover:underline">085694009155</a>
                                 </div>
                             </div>
                             <a href="https://wa.me/6285694009155" target="_blank" class="w-full sm:w-auto bg-green-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-700 transition duration-150 flex items-center justify-center space-x-2">
@@ -205,12 +205,53 @@
             <!-- Guru BK View -->
             <div id="gurubk-view" class="h-full w-full hidden">
                 <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Panel Guru BK</h2>
-                <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
-                        <i data-lucide="inbox" class="w-5 h-5 mr-2"></i>Antrean Janji Temu Masuk
-                    </h3>
-                    <div id="gurubk-appointments-list" class="space-y-4">
-                        <p id="no-gurubk-appointments" class="text-gray-500 italic">Tidak ada janji temu baru.</p>
+                <div id="gurubk-content" class="h-full">
+                    <!-- Tab: Antrean Janji Temu -->
+                    <div id="tab-gurubk-appointments" class="gurubk-tab-content h-full hidden">
+                         <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                                <i data-lucide="inbox" class="w-5 h-5 mr-2"></i>Antrean Janji Temu Masuk
+                            </h3>
+                            <div id="gurubk-appointments-list" class="space-y-4">
+                                <p id="no-gurubk-appointments" class="text-gray-500 italic">Tidak ada janji temu baru.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Chat Siswa -->
+                    <div id="tab-gurubk-chat" class="gurubk-tab-content hidden h-full flex flex-col">
+                        <div class="bg-white p-6 rounded-xl shadow-lg flex-1">
+                            <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
+                                <i data-lucide="message-circle" class="w-5 h-5 mr-2"></i>Pesan dari Siswa
+                            </h3>
+                            <div id="gurubk-chat-threads" class="space-y-3 max-h-[80vh] overflow-y-auto custom-scrollbar">
+                                <p id="no-chat-threads" class="text-gray-500 italic">Belum ada pesan dari Siswa.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Kelola Materi -->
+                    <div id="tab-gurubk-materi" class="gurubk-tab-content hidden">
+                        <div class="bg-white p-6 rounded-xl shadow-lg mb-6">
+                            <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="file-plus" class="w-5 h-5 mr-2"></i>Buat Materi Baru</h3>
+                            <form id="materi-form">
+                                <input type="hidden" id="materi-id">
+                                <div class="mb-4">
+                                    <label for="materi-title" class="block text-sm font-medium text-gray-700 mb-1">Judul Materi</label>
+                                    <input type="text" id="materi-title" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Contoh: 3 Kunci Fokus Belajar">
+                                </div>
+                                <div class="mb-6">
+                                    <label for="materi-content" class="block text-sm font-medium text-gray-700 mb-1">Isi Materi</label>
+                                    <textarea id="materi-content" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Tuliskan konten motivasi di sini..."></textarea>
+                                </div>
+                                <button type="submit" id="materi-submit-btn" class="btn-primary w-full bg-green-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-700 transition">Tambah Materi</button>
+                            </form>
+                        </div>
+
+                        <h3 class="text-2xl font-bold text-gray-800 mb-4 mt-8">Daftar Materi Aktif</h3>
+                        <div id="gurubk-materi-list" class="space-y-4">
+                            <p id="no-gurubk-materi" class="text-gray-500 italic">Belum ada materi yang dibuat.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -230,16 +271,53 @@
                          <div id="admin-all-appointments-list" class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar"></div>
                     </div>
                  </div>
+                 
+                 <!-- Laporan Siswa / Sistem -->
+                 <div class="mt-8 bg-white p-6 rounded-xl shadow-lg border-t-4 border-slate-700">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="book-text" class="w-5 h-5 mr-2"></i>Laporan & Statistik Sistem</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="p-3 bg-blue-50 rounded-lg text-center"><p class="text-2xl font-bold text-blue-800" id="stat-students">0</p><p class="text-sm text-blue-600">Total Siswa</p></div>
+                        <div class="p-3 bg-green-50 rounded-lg text-center"><p class="text-2xl font-bold text-green-800" id="stat-appointments">0</p><p class="text-sm text-green-600">Total Janji</p></div>
+                        <div class="p-3 bg-yellow-50 rounded-lg text-center"><p class="text-2xl font-bold text-yellow-800" id="stat-pending">0</p><p class="text-sm text-yellow-600">Janji Tertunda</p></div>
+                    </div>
+                    <button onclick="viewSystemReport()" class="btn-primary w-full bg-slate-700 text-white font-bold py-3 px-4 rounded-xl hover:bg-slate-800 transition flex items-center justify-center space-x-2">
+                        <i data-lucide="download" class="w-5 h-5"></i><span>Lihat Laporan Detail Siswa</span>
+                    </button>
+                 </div>
             </div>
 
             <!-- Custom Modal -->
             <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
                     <h3 id="modal-title" class="text-xl font-bold mb-3 text-gray-800">Notifikasi</h3>
-                    <p id="modal-message" class="text-gray-600 mb-5"></p>
+                    <div id="modal-message" class="text-gray-600 mb-5 overflow-y-auto max-h-64 whitespace-pre-wrap text-sm"></div>
                     <button id="modal-close-btn" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Tutup</button>
                 </div>
             </div>
+
+             <!-- Chat View/Reply Modal for Guru BK -->
+            <div id="chat-reply-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-white p-6 rounded-xl shadow-2xl max-w-lg w-full h-[90vh] flex flex-col">
+                    <div class="flex justify-between items-center mb-4 border-b pb-3">
+                        <h3 class="text-xl font-bold text-gray-800">Chat dengan <span id="chat-reply-student-name"></span></h3>
+                        <button onclick="closeChatReplyModal()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="gurubk-specific-chat-messages" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar p-2 mb-4 bg-gray-50 rounded-lg">
+                        <!-- Messages render here -->
+                    </div>
+                    
+                    <form id="gurubk-chat-reply-form" class="flex space-x-3">
+                        <input type="text" id="gurubk-chat-reply-input" required placeholder="Balas pesan siswa..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
+                        <button type="submit" class="btn-primary bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center">
+                            <i data-lucide="send" class="w-5 h-5"></i><span class="hidden sm:inline ml-2">Balas</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -250,16 +328,20 @@
         let studentProfile = null; 
         let guruBkProfile = null;
         let adminProfile = null;
+        // In a real app, this would be dynamic from Firebase Auth
         let userId = 'local_student_01'; // Static ID for local simulation
         
-        const localMotivationalPosts = [
+        // Use a standard mock post structure.
+        let localMotivationalPosts = [
             { id: 'post1', title: 'Kunci Sukses: Konsistensi Kecil', content: 'Kesuksesan bukanlah hasil dari tindakan besar yang jarang dilakukan, melainkan serangkaian kebiasaan kecil yang diulang setiap hari.', author: 'BK Sekolah' },
             { id: 'post2', title: 'Mengatasi Prokrastinasi', content: 'Teknik "5 Menit": Mulai tugas yang Anda tunda hanya selama 5 menit. Seringkali, begitu Anda memulai, inersia akan membawa Anda untuk menyelesaikannya lebih lama.', author: 'BK Sekolah' },
-            { id: 'post3', title: 'Pentingnya Istirahat', content: 'Belajar keras itu penting, tapi istirahat cerdas itu krusial. Tubuh dan pikiran Anda butuh waktu untuk memproses dan memulihkan energi.', author: 'BK Sekolah' },
         ];
         
         let localAppointments = [];
         let localChatMessages = [];
+        
+        // Variable to track the student currently being replied to by Guru BK
+        let currentChatStudentId = null; 
         
         // --- LocalStorage Persistence ---
         function saveDataToLocalStorage() {
@@ -268,6 +350,7 @@
             localStorage.setItem('bkApp_adminProfile', JSON.stringify(adminProfile));
             localStorage.setItem('bkApp_appointments', JSON.stringify(localAppointments));
             localStorage.setItem('bkApp_chatMessages', JSON.stringify(localChatMessages));
+            localStorage.setItem('bkApp_motivationalPosts', JSON.stringify(localMotivationalPosts));
         }
 
         function loadDataFromLocalStorage() {
@@ -280,6 +363,14 @@
 
             const chatData = JSON.parse(localStorage.getItem('bkApp_chatMessages')) || [];
             localChatMessages = chatData.map(msg => ({...msg, timestamp: new Date(msg.timestamp) }));
+            
+            const postsData = JSON.parse(localStorage.getItem('bkApp_motivationalPosts')) || localMotivationalPosts;
+            localMotivationalPosts = postsData;
+
+            // Ensure static studentId is used if studentProfile exists (for chat/app consistency)
+            if (studentProfile) {
+                userId = studentProfile.id || 'local_student_01';
+            }
         }
         
         // --- Utility Functions ---
@@ -289,7 +380,14 @@
             document.getElementById('custom-modal').classList.remove('hidden');
         }
         document.getElementById('modal-close-btn').onclick = () => document.getElementById('custom-modal').classList.add('hidden');
-        function returnToRoleSelector() { window.location.reload(); }
+        function closeChatReplyModal() { document.getElementById('chat-reply-modal').classList.add('hidden'); currentChatStudentId = null; }
+        window.closeChatReplyModal = closeChatReplyModal;
+        
+        function returnToRoleSelector() { 
+            // Save state before reloading
+            saveDataToLocalStorage();
+            window.location.reload(); 
+        }
         window.returnToRoleSelector = returnToRoleSelector;
 
         // --- Display Info Updaters ---
@@ -313,7 +411,7 @@
             } else if (userRole === 'gurubk') {
                 document.getElementById('gurubk-view').classList.remove('hidden');
                 loadGuruBkLayout();
-                renderGuruBkAppointments();
+                loadInitialGuruBkData(); // New function for BK data
             } else if (userRole === 'admin') {
                 document.getElementById('admin-view').classList.remove('hidden');
                 loadAdminLayout();
@@ -327,6 +425,14 @@
 
         function setRoleAndLogin(role) {
             userRole = role;
+            
+            // Re-assign userId for student based on local data if exists
+            if (role === 'student' && studentProfile && studentProfile.id) {
+                userId = studentProfile.id;
+            } else if (role === 'student') {
+                userId = `local_student_${Date.now()}`; // New student gets a fresh ID
+            }
+
             let profileExists = (role === 'student' && studentProfile) || (role === 'gurubk' && guruBkProfile) || (role === 'admin' && adminProfile);
             
             if (profileExists) {
@@ -340,6 +446,7 @@
         window.setRoleAndLogin = setRoleAndLogin;
 
         // --- Navigation Logic ---
+        // Student Navigation
         const studentTabs = ['materi', 'appointment', 'chat'];
         function setActiveTab(tabName) {
             studentTabs.forEach(tab => {
@@ -354,30 +461,54 @@
             lucide.createIcons();
         }
         window.setActiveTab = setActiveTab;
+        
+        // Guru BK Navigation
+        const gurubkTabs = ['appointments', 'chat', 'materi'];
+        function setActiveGuruBkTab(tabName) {
+            gurubkTabs.forEach(tab => {
+                document.getElementById(`tab-gurubk-${tab}`).classList.add('hidden');
+                document.querySelector(`#desktop-nav .tab-gurubk-${tab}`)?.classList.remove('bg-green-100', 'text-green-700', 'font-semibold');
+            });
+            document.getElementById(`tab-gurubk-${tabName}`).classList.remove('hidden');
+            document.querySelector(`#desktop-nav .tab-gurubk-${tabName}`)?.classList.add('bg-green-100', 'text-green-700', 'font-semibold');
+            if (tabName === 'chat') renderGurubkChatThreads();
+            if (tabName === 'materi') renderMateriManagementList();
+            lucide.createIcons();
+        }
+        window.setActiveGuruBkTab = setActiveGuruBkTab;
+
 
         // --- Layout Loaders ---
         function loadStudentLayout() {
-            const navHtml = `<div class="flex justify-around items-center h-16"><button onclick="setActiveTab('materi')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span class="text-xs mt-1">Motivasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span class="text-xs mt-1">Janji Temu</span></button><button onclick="setActiveTab('chat')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span class="text-xs mt-1">Chat</span></button></div><button onclick="returnToRoleSelector()" class="w-full bg-red-500 text-white text-xs font-medium py-2 flex items-center justify-center space-x-1"><i data-lucide="log-out" class="w-4 h-4"></i><span>Logout</span></button>`;
-            document.getElementById('mobile-nav').innerHTML = navHtml;
+            // Mobile Nav
+            const mobileNavHtml = `<div class="flex justify-around items-center h-16"><button onclick="setActiveTab('materi')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span class="text-xs mt-1">Motivasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span class="text-xs mt-1">Janji Temu</span></button><button onclick="setActiveTab('chat')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span class="text-xs mt-1">Chat</span></button></div><button onclick="returnToRoleSelector()" class="w-full bg-red-500 text-white text-xs font-medium py-2 flex items-center justify-center space-x-1"><i data-lucide="log-out" class="w-4 h-4"></i><span>Logout</span></button>`;
+            document.getElementById('mobile-nav').innerHTML = mobileNavHtml;
+            // Desktop Nav
             const sidebarHtml = `<h1 class="text-2xl font-bold text-blue-700 mb-6 flex items-center"><i data-lucide="graduation-cap" class="w-7 h-7 mr-2"></i>Sistem BK</h1><div class="flex flex-col space-y-2"><button onclick="setActiveTab('materi')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span>Materi Motivasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span>Janji Temu</span></button><button onclick="setActiveTab('chat')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span>Chat Privasi</span></button></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Siswa:</p><p id="user-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
             document.getElementById('desktop-nav').innerHTML = sidebarHtml;
             setActiveTab('materi');
+            document.getElementById('mobile-nav').classList.remove('hidden');
         }
 
         function loadGuruBkLayout() {
-            const sidebarHtml = `<h1 class="text-2xl font-bold text-green-700 mb-6 flex items-center"><i data-lucide="shield-check" class="w-7 h-7 mr-2"></i>Panel BK</h1><div class="flex flex-col space-y-2"><div class="w-full text-left p-3 rounded-lg bg-green-100 text-green-700 font-semibold flex items-center space-x-2"><i data-lucide="clipboard-list" class="w-5 h-5"></i><span>Antrean Konseling</span></div></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Guru BK:</p><p id="gurubk-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
+            // Mobile navigation is hidden for Guru BK/Admin to force desktop-like interface on mobile
+            document.getElementById('mobile-nav').classList.add('hidden');
+            // Desktop Nav (Sidebar)
+            const sidebarHtml = `<h1 class="text-2xl font-bold text-green-700 mb-6 flex items-center"><i data-lucide="shield-check" class="w-7 h-7 mr-2"></i>Panel BK</h1><div class="flex flex-col space-y-2"><button onclick="setActiveGuruBkTab('appointments')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-green-50 flex items-center space-x-2 tab-gurubk-appointments"><i data-lucide="clipboard-list" class="w-5 h-5"></i><span>Antrean Konseling</span></button><button onclick="setActiveGuruBkTab('chat')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-green-50 flex items-center space-x-2 tab-gurubk-chat"><i data-lucide="message-circle-more" class="w-5 h-5"></i><span>Kotak Masuk Chat</span></button><button onclick="setActiveGuruBkTab('materi')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-green-50 flex items-center space-x-2 tab-gurubk-materi"><i data-lucide="book-open-text" class="w-5 h-5"></i><span>Kelola Materi</span></button></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Guru BK:</p><p id="gurubk-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
             document.getElementById('desktop-nav').innerHTML = sidebarHtml;
+            setActiveGuruBkTab('appointments');
         }
 
         function loadAdminLayout() {
-            const sidebarHtml = `<h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center"><i data-lucide="server" class="w-7 h-7 mr-2"></i>Panel Admin</h1><div class="flex flex-col space-y-2"><div class="w-full text-left p-3 rounded-lg bg-slate-200 text-slate-800 font-semibold flex items-center space-x-2"><i data-lucide="database" class="w-5 h-5"></i><span>Pengelola Data</span></div></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Admin:</p><p id="admin-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
+            document.getElementById('mobile-nav').classList.add('hidden');
+            const sidebarHtml = `<h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center"><i data-lucide="server" class="w-7 h-7 mr-2"></i>Panel Admin</h1><div class="flex flex-col space-y-2"><div class="w-full text-left p-3 rounded-lg bg-slate-200 text-slate-800 font-semibold flex items-center space-x-2"><i data-lucide="database" class="w-5 h-5"></i><span>Dashboard Utama</span></div></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Admin:</p><p id="admin-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
             document.getElementById('desktop-nav').innerHTML = sidebarHtml;
         }
 
         // --- Data Form Handling ---
         document.getElementById('student-info-form').addEventListener('submit', (e) => {
             e.preventDefault();
-            studentProfile = { fullName: document.getElementById('student-name').value.trim(), school: document.getElementById('student-school').value.trim(), major: document.getElementById('student-major').value.trim(), role: 'Siswa' };
+            studentProfile = { id: userId, fullName: document.getElementById('student-name').value.trim(), school: document.getElementById('student-school').value.trim(), major: document.getElementById('student-major').value.trim(), role: 'Siswa' };
             saveDataToLocalStorage();
             proceedToApp();
         });
@@ -419,32 +550,39 @@
             e.preventDefault();
             const chatInput = document.getElementById('chat-input');
             if (!chatInput.value.trim()) return;
-            localChatMessages.push({ senderId: userId, message: chatInput.value.trim(), timestamp: new Date() });
+            localChatMessages.push({ senderId: userId, senderName: studentProfile.fullName, message: chatInput.value.trim(), timestamp: new Date(), role: 'student' });
             renderChatMessages();
-            setTimeout(() => {
-                localChatMessages.push({ senderId: 'BK_Teacher', message: `Terima kasih atas pesan Anda. Kami akan segera merespon.`, timestamp: new Date() });
-                renderChatMessages();
-                saveDataToLocalStorage();
-            }, 1500);
             chatInput.value = '';
             saveDataToLocalStorage();
         });
 
         const renderChatMessages = () => {
             const list = document.getElementById('chat-messages');
-            list.innerHTML = localChatMessages.map(msg => {
-                const isUser = msg.senderId === userId;
-                return `<div class="max-w-[80%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm"><p>${msg.senderId === 'BK_Teacher' ? `<span class="font-bold">Guru BK</span>: ` : ''}${msg.message}</p><p class="text-xs ${isUser ? 'text-blue-200' : 'text-gray-500'} text-right mt-1">${msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`;
+            // Filter messages for the current student
+            const studentMessages = localChatMessages.filter(msg => msg.senderId === userId || msg.recipientId === userId);
+            
+            list.innerHTML = studentMessages.map(msg => {
+                // If message is from student or for student from BK, it belongs to this thread
+                const isUser = msg.role === 'student'; // True if message is from student
+                
+                return `<div class="max-w-[80%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm"><p>${!isUser ? `<span class="font-bold">Guru BK</span>: ` : ''}${msg.message}</p><p class="text-xs ${isUser ? 'text-blue-200' : 'text-gray-500'} text-right mt-1">${msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`;
             }).join('');
             list.scrollTop = list.scrollHeight;
         };
         
         // --- Guru BK Features ---
+        function loadInitialGuruBkData() {
+            renderGuruBkAppointments();
+            renderGurubkChatThreads();
+            renderMateriManagementList();
+        }
+
         window.updateAppointmentStatus = (docId, newStatus) => {
             const appointment = localAppointments.find(app => app.id === docId);
             if (appointment) {
                 appointment.status = newStatus;
                 renderGuruBkAppointments();
+                renderAppointments(); // Update student view if needed
                 saveDataToLocalStorage();
                 showCustomModal('Sukses', `Status Janji Temu diperbarui menjadi **${newStatus}**.`);
             }
@@ -457,20 +595,234 @@
             list.innerHTML = pending.map(app => `<div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm"><div class="flex justify-between items-start mb-2"><p class="font-bold text-lg text-gray-800">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-700">Oleh: <span class="font-semibold">${app.studentName}</span></p><p class="text-sm text-gray-600 mt-1">Alasan: ${app.reason}</p><div class="mt-4 pt-3 border-t border-gray-200 flex flex-wrap gap-2"><button onclick="updateAppointmentStatus('${app.id}', 'Confirmed')" class="btn-primary flex-1 bg-green-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-green-600">Konfirmasi</button><button onclick="updateAppointmentStatus('${app.id}', 'Rejected')" class="btn-primary flex-1 bg-red-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-red-600">Tolak</button><button onclick="updateAppointmentStatus('${app.id}', 'Completed')" class="btn-secondary flex-1 bg-blue-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-blue-600">Selesaikan</button></div></div>`).join('');
             lucide.createIcons();
         };
+        
+        // --- Guru BK Chat Management ---
+        const getUniqueChatSenders = () => {
+            // Find all unique student IDs who have sent messages
+            const studentMessages = localChatMessages.filter(msg => msg.role === 'student');
+            const uniqueIds = [...new Set(studentMessages.map(msg => msg.senderId))];
+            
+            // Map IDs to the latest message and student name
+            return uniqueIds.map(id => {
+                const threadMessages = localChatMessages.filter(msg => msg.senderId === id || msg.recipientId === id).sort((a, b) => b.timestamp - a.timestamp);
+                const latestMessage = threadMessages[0];
+                return {
+                    studentId: id,
+                    studentName: latestMessage.senderName || 'Siswa',
+                    latestMessageText: latestMessage.message,
+                    latestTimestamp: latestMessage.timestamp
+                };
+            }).sort((a,b) => b.latestTimestamp - a.latestTimestamp); // Sort by latest activity
+        };
 
-        // --- Admin Features ---
+        const renderGurubkChatThreads = () => {
+            const list = document.getElementById('gurubk-chat-threads'), noThreads = document.getElementById('no-chat-threads');
+            const threads = getUniqueChatSenders();
+            noThreads.classList.toggle('hidden', threads.length > 0);
+
+            list.innerHTML = threads.map(thread => `
+                <div onclick="openChatReplyModal('${thread.studentId}', '${thread.studentName}')" class="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 cursor-pointer transition">
+                    <div class="flex justify-between items-center">
+                        <p class="font-bold text-gray-800">${thread.studentName}</p>
+                        <p class="text-xs text-gray-500">${thread.latestTimestamp.toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1 line-clamp-1">${thread.latestMessageText}</p>
+                </div>
+            `).join('');
+        };
+        window.openChatReplyModal = (studentId, studentName) => {
+            currentChatStudentId = studentId;
+            document.getElementById('chat-reply-student-name').textContent = studentName;
+            
+            // Render specific chat messages
+            const renderSpecificChat = () => {
+                 const chatList = document.getElementById('gurubk-specific-chat-messages');
+                 const threadMessages = localChatMessages.filter(msg => msg.senderId === studentId || msg.recipientId === studentId).sort((a, b) => a.timestamp - b.timestamp);
+                 
+                 chatList.innerHTML = threadMessages.map(msg => {
+                    const isGuruBk = msg.role === 'gurubk';
+                    return `<div class="max-w-[80%] ${isGuruBk ? 'chat-message-bk ml-auto' : 'chat-message-user mr-auto'} p-3 text-sm"><p class="font-semibold">${isGuruBk ? 'Anda (BK):' : msg.senderName}:</p><p>${msg.message}</p><p class="text-xs ${isGuruBk ? 'text-gray-500' : 'text-blue-200'} text-right mt-1">${msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`;
+                }).join('');
+                chatList.scrollTop = chatList.scrollHeight;
+            };
+            
+            // Bind reply submission
+            document.getElementById('gurubk-chat-reply-form').onsubmit = (e) => {
+                e.preventDefault();
+                const replyInput = document.getElementById('gurubk-chat-reply-input');
+                if (!replyInput.value.trim()) return;
+
+                localChatMessages.push({
+                    senderId: 'BK_Teacher', 
+                    recipientId: currentChatStudentId,
+                    senderName: guruBkProfile.fullName,
+                    message: replyInput.value.trim(), 
+                    timestamp: new Date(), 
+                    role: 'gurubk' 
+                });
+
+                renderSpecificChat();
+                // If the student is currently logged in, update their chat view too
+                if (userRole === 'student' && userId === currentChatStudentId) renderChatMessages();
+                
+                replyInput.value = '';
+                saveDataToLocalStorage();
+                renderGurubkChatThreads(); // Update thread list
+            };
+            
+            renderSpecificChat();
+            document.getElementById('chat-reply-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('gurubk-chat-reply-input').focus(), 100);
+        };
+        
+        // --- Guru BK Materi Management (CRUD) ---
+        const renderMateriManagementList = () => {
+            const list = document.getElementById('gurubk-materi-list'), noMateri = document.getElementById('no-gurubk-materi');
+            noMateri.classList.toggle('hidden', localMotivationalPosts.length > 0);
+
+            list.innerHTML = localMotivationalPosts.map(post => `
+                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
+                    <p class="font-bold text-lg text-gray-800">${post.title}</p>
+                    <p class="text-sm text-gray-600 mt-1 line-clamp-2">${post.content}</p>
+                    <p class="text-xs text-gray-400 mt-2">Oleh: ${post.author}</p>
+                    <div class="mt-3 border-t border-gray-200 pt-3 flex gap-2">
+                        <button onclick="editMateri('${post.id}')" class="btn-secondary bg-blue-500 text-white text-xs py-1.5 px-3 rounded-lg hover:bg-blue-600 flex items-center space-x-1"><i data-lucide="edit-3" class="w-4 h-4"></i><span>Edit</span></button>
+                        <button onclick="deleteMateri('${post.id}')" class="btn-secondary bg-red-500 text-white text-xs py-1.5 px-3 rounded-lg hover:bg-red-600 flex items-center space-x-1"><i data-lucide="trash-2" class="w-4 h-4"></i><span>Hapus</span></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        };
+
+        document.getElementById('materi-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = document.getElementById('materi-id').value;
+            const title = document.getElementById('materi-title').value.trim();
+            const content = document.getElementById('materi-content').value.trim();
+            const author = guruBkProfile.fullName || 'Guru BK';
+
+            if (id) {
+                // Edit existing post
+                const index = localMotivationalPosts.findIndex(p => p.id === id);
+                if (index > -1) {
+                    localMotivationalPosts[index] = { ...localMotivationalPosts[index], title, content, author };
+                    showCustomModal('Sukses', 'Materi berhasil diperbarui.');
+                }
+            } else {
+                // Add new post
+                localMotivationalPosts.unshift({ id: `post_${Date.now()}`, title, content, author });
+                showCustomModal('Sukses', 'Materi baru berhasil ditambahkan.');
+            }
+            
+            saveDataToLocalStorage();
+            renderMateriManagementList();
+            renderMotivationalPosts(); // Update student view
+            // Reset form
+            e.target.reset();
+            document.getElementById('materi-id').value = '';
+            document.getElementById('materi-submit-btn').textContent = 'Tambah Materi';
+            lucide.createIcons();
+        });
+        
+        window.editMateri = (id) => {
+            const post = localMotivationalPosts.find(p => p.id === id);
+            if (post) {
+                document.getElementById('materi-id').value = post.id;
+                document.getElementById('materi-title').value = post.title;
+                document.getElementById('materi-content').value = post.content;
+                document.getElementById('materi-submit-btn').textContent = 'Simpan Perubahan';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+
+        window.deleteMateri = (id) => {
+            if (confirm('Apakah Anda yakin ingin menghapus materi ini?')) {
+                localMotivationalPosts = localMotivationalPosts.filter(p => p.id !== id);
+                saveDataToLocalStorage();
+                renderMateriManagementList();
+                renderMotivationalPosts();
+                showCustomModal('Sukses', 'Materi berhasil dihapus.');
+            }
+        };
+
+
+        // --- Admin Features (Laporan Siswa/Sistem) ---
         const renderAdminDashboard = () => {
+            // Stats calculation
+            const totalStudents = studentProfile ? 1 : 0; // Only tracking one local student
+            const totalAppointments = localAppointments.length;
+            const totalPending = localAppointments.filter(app => app.status === 'Pending').length;
+
+            document.getElementById('stat-students').textContent = totalStudents;
+            document.getElementById('stat-appointments').textContent = totalAppointments;
+            document.getElementById('stat-pending').textContent = totalPending;
+            
             // Render Users List
             const usersList = document.getElementById('admin-users-list');
             let allUsers = [];
             if (studentProfile) allUsers.push(studentProfile);
             if (guruBkProfile) allUsers.push(guruBkProfile);
-            usersList.innerHTML = allUsers.length > 0 ? allUsers.map(user => `<div class="p-3 rounded-lg ${user.role === 'Siswa' ? 'bg-blue-50' : 'bg-green-50'} flex justify-between items-center"><div class="font-semibold text-gray-800">${user.fullName}</div><div class="text-xs font-bold ${user.role === 'Siswa' ? 'text-blue-600' : 'text-green-600'}">${user.role}</div></div>`).join('') : `<p class="text-gray-500 italic">Belum ada pengguna terdaftar.</p>`;
+            usersList.innerHTML = allUsers.length > 0 ? allUsers.map(user => `<div class="p-3 rounded-lg ${user.role === 'Siswa' ? 'bg-blue-50' : user.role === 'Guru BK' ? 'bg-green-50' : 'bg-slate-100'} flex justify-between items-center"><div class="font-semibold text-gray-800">${user.fullName}</div><div class="text-xs font-bold ${user.role === 'Siswa' ? 'text-blue-600' : user.role === 'Guru BK' ? 'text-green-600' : 'text-slate-600'}">${user.role}</div></div>`).join('') : `<p class="text-gray-500 italic">Belum ada pengguna terdaftar.</p>`;
 
             // Render All Appointments
             const appointmentsList = document.getElementById('admin-all-appointments-list');
             appointmentsList.innerHTML = localAppointments.length > 0 ? localAppointments.map(app => `<div class="p-3 rounded-lg bg-gray-50 border border-gray-200"><div class="flex justify-between items-center"><p class="font-semibold text-sm">${app.studentName}</p><span class="status-${app.status} px-2 py-0.5 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-xs text-gray-500">${app.date} - ${app.time}</p></div>`).join('') : `<p class="text-gray-500 italic">Belum ada janji temu dibuat.</p>`;
         };
+
+        window.viewSystemReport = () => {
+            let reportText = "--- Laporan Detail Sistem BK (Mode Lokal) ---\n\n";
+
+            // 1. Data Siswa
+            reportText += `1. DATA PROFIL SISWA (${studentProfile ? 1 : 0} Siswa Terdaftar):\n`;
+            if (studentProfile) {
+                reportText += `   - Nama: ${studentProfile.fullName}\n`;
+                reportText += `   - Sekolah: ${studentProfile.school}\n`;
+                reportText += `   - Jurusan: ${studentProfile.major}\n`;
+                reportText += `   - ID (Lokal): ${studentProfile.id}\n`;
+            } else {
+                reportText += "   (Belum ada data siswa)\n";
+            }
+            reportText += "\n";
+
+            // 2. Data Guru BK
+            reportText += `2. DATA PROFIL GURU BK:\n`;
+            if (guruBkProfile) {
+                reportText += `   - Nama: ${guruBkProfile.fullName}\n`;
+                reportText += `   - Telepon: ${guruBkProfile.phoneNumber}\n`;
+            } else {
+                reportText += "   (Belum ada data Guru BK)\n";
+            }
+            reportText += "\n";
+
+            // 3. Data Janji Temu
+            reportText += `3. DATA JANJI TEMU (${localAppointments.length} Total):\n`;
+            if (localAppointments.length > 0) {
+                localAppointments.forEach((app, index) => {
+                    reportText += `   ${index + 1}. [${app.status}] ${app.studentName} (${app.date} Pukul ${app.time})\n`;
+                    reportText += `      Alasan: ${app.reason}\n`;
+                });
+            } else {
+                reportText += "   (Tidak ada janji temu)\n";
+            }
+            reportText += "\n";
+
+            // 4. Data Chat
+            reportText += `4. STATISTIK CHAT (${localChatMessages.length} Total Pesan):\n`;
+            const threads = getUniqueChatSenders();
+            reportText += `   - Jumlah Thread Aktif: ${threads.length}\n`;
+            reportText += `   - Pesan Terakhir:\n`;
+            if (localChatMessages.length > 0) {
+                 const lastMsg = localChatMessages[localChatMessages.length - 1];
+                 const sender = lastMsg.role === 'student' ? lastMsg.senderName : 'Guru BK';
+                 reportText += `     > [${sender}] ${lastMsg.message.substring(0, 40)}...\n`;
+            } else {
+                reportText += "     (Belum ada pesan)\n";
+            }
+            reportText += "\n";
+            
+            showCustomModal('Laporan Detail Siswa', `<pre class="text-xs">${reportText}</pre>`);
+        };
+
 
         // --- Initial Load ---
         function loadInitialStudentData() {
@@ -483,8 +835,14 @@
             loadDataFromLocalStorage();
             document.getElementById('role-selector').classList.remove('hidden');
             lucide.createIcons();
+            
+             // Initialize default student ID if no profile exists
+            if (!studentProfile) {
+                userId = `local_student_${Date.now()}`;
+            } else {
+                userId = studentProfile.id; // Use saved ID
+            }
         });
     </script>
 </body>
 </html>
-

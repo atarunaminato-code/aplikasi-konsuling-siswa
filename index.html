@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Konseling BK (Penyimpanan Lokal)</title>
+    <title>Aplikasi Konseling BK (Tema Sekolah)</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Lucide Icons -->
@@ -12,98 +12,99 @@
         /* Mengatur font default Inter */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f7f7f7;
+            background-color: #f0f7ff; /* Latar belakang lembut seperti kertas */
         }
+        
         /* Styling untuk scrollbar yang lebih halus */
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background-color: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #93c5fd; /* Sky-300 */ border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background-color: #e0f2fe; /* Sky-100 */ }
         
         /* Efek klik pada tombol */
         .btn-primary:active, .btn-secondary:active { transform: scale(0.98); }
         
         /* Warna status janji temu */
-        .status-Pending { @apply bg-yellow-100 text-yellow-800; }
-        .status-Confirmed { @apply bg-green-100 text-green-800; }
-        .status-Rejected { @apply bg-red-100 text-red-800; }
-        .status-Completed { @apply bg-blue-100 text-blue-800; }
+        .status-Pending { @apply bg-yellow-100 text-yellow-800 font-bold; }
+        .status-Confirmed { @apply bg-green-100 text-green-800 font-bold; }
+        .status-Rejected { @apply bg-red-100 text-red-800 font-bold; }
+        .status-Completed { @apply bg-sky-100 text-sky-800 font-bold; }
 
         /* Styling spesifik untuk chat */
-        .chat-message-user { @apply bg-blue-500 text-white self-end rounded-bl-xl rounded-t-xl; }
-        .chat-message-bk { @apply bg-gray-200 text-gray-800 self-start rounded-br-xl rounded-t-xl; }
+        .chat-message-user { @apply bg-sky-500 text-white self-end rounded-bl-2xl rounded-t-2xl shadow-md; }
+        .chat-message-bk { @apply bg-amber-100 text-gray-800 self-start rounded-br-2xl rounded-t-2xl shadow-md border border-amber-200; }
         
-        /* Style untuk Role Selector */
-        #role-selector { background: linear-gradient(135deg, #4F46E5 0%, #1E40AF 100%); }
+        /* Style untuk Role Selector: Gradien papan tulis/mading */
+        #role-selector { background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
     <!-- Screen 1: Role Selector -->
     <div id="role-selector" class="absolute inset-0 z-50 flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full text-center">
-            <i data-lucide="shield-check" class="w-12 h-12 text-blue-600 mx-auto mb-4"></i>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2">Selamat Datang</h2>
-            <p class="text-gray-600 mb-8">Anda masuk sebagai siapa?</p>
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full text-center border-t-8 border-amber-400 transform hover:scale-[1.01] transition duration-300">
+            <i data-lucide="compass" class="w-14 h-14 text-sky-600 mx-auto mb-4 animate-bounce"></i>
+            <h2 class="text-4xl font-extrabold text-gray-800 mb-2">Pusat BK Digital</h2>
+            <p class="text-gray-600 mb-8 font-medium">Bimbingan & Konseling Sekolah</p>
             
-            <button onclick="setRoleAndLogin('student')" class="btn-primary w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition duration-150 mb-4 flex items-center justify-center space-x-2">
-                <i data-lucide="user" class="w-5 h-5"></i>
-                <span>Login Siswa</span>
+            <button onclick="setRoleAndLogin('student')" class="btn-primary w-full bg-sky-600 text-white font-extrabold py-4 rounded-xl shadow-lg hover:bg-sky-700 transition duration-150 mb-4 flex items-center justify-center space-x-2 text-lg">
+                <i data-lucide="user-plus" class="w-6 h-6"></i>
+                <span>Login Siswa (Pencari Bimbingan)</span>
             </button>
             
-            <button onclick="setRoleAndLogin('gurubk')" class="btn-secondary w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition duration-150 mb-4 flex items-center justify-center space-x-2">
-                <i data-lucide="graduation-cap" class="w-5 h-5"></i>
-                <span>Login Guru BK</span>
+            <button onclick="setRoleAndLogin('gurubk')" class="btn-secondary w-full bg-amber-500 text-gray-900 font-extrabold py-4 rounded-xl shadow-lg hover:bg-amber-600 transition duration-150 mb-4 flex items-center justify-center space-x-2 text-lg">
+                <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                <span>Login Guru BK (Mentor)</span>
             </button>
 
-            <button onclick="setRoleAndLogin('admin')" class="btn-secondary w-full bg-slate-800 text-white font-bold py-3 rounded-xl hover:bg-slate-900 transition duration-150 mt-4 flex items-center justify-center space-x-2">
-                <i data-lucide="server" class="w-5 h-5"></i>
-                <span>Login Admin Pengelola</span>
+            <button onclick="setRoleAndLogin('admin')" class="btn-secondary w-full bg-gray-800 text-white font-extrabold py-4 rounded-xl shadow-lg hover:bg-gray-900 transition duration-150 mt-4 flex items-center justify-center space-x-2 text-lg">
+                <i data-lucide="shield" class="w-6 h-6"></i>
+                <span>Login Admin (Pengelola Sistem)</span>
             </button>
-            <p id="role-auth-status" class="text-xs text-gray-500 mt-4">Mode Lokal: Data disimpan di browser.</p>
+            <p id="role-auth-status" class="text-xs text-gray-500 mt-6">Mode Lokal: Data disimpan di browser.</p>
         </div>
     </div>
     
     <!-- Data Forms for First Time Users -->
-    <div id="student-data-form" class="absolute inset-0 z-40 flex items-center justify-center p-4 bg-gray-100 hidden">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full">
-             <i data-lucide="file-text" class="w-12 h-12 text-blue-600 mx-auto mb-4"></i>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Lengkapi Data Diri Siswa</h2>
-            <p class="text-gray-600 mb-8 text-center">Silakan isi data berikut untuk melanjutkan.</p>
+    <div id="student-data-form" class="absolute inset-0 z-40 flex items-center justify-center p-4 bg-sky-50 hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border-t-8 border-sky-500">
+             <i data-lucide="notebook-pen" class="w-12 h-12 text-sky-600 mx-auto mb-4"></i>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Data Siswa</h2>
+            <p class="text-gray-600 mb-8 text-center">Siapkan buku catatan Anda!</p>
             <form id="student-info-form">
                 <div class="mb-4">
                     <label for="student-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                    <input type="text" id="student-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: Budi Sanjaya">
+                    <input type="text" id="student-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Contoh: Budi Sanjaya">
                 </div>
                 <div class="mb-4">
                     <label for="student-school" class="block text-sm font-medium text-gray-700 mb-1">Asal Sekolah</label>
-                    <input type="text" id="student-school" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: SMAN 1 Dramaga">
+                    <input type="text" id="student-school" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Contoh: SMAN 1 Dramaga">
                 </div>
                 <div class="mb-6">
-                    <label for="student-major" class="block text-sm font-medium text-gray-700 mb-1">Jurusan</label>
-                    <input type="text" id="student-major" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: IPA / IPS / SMK RPL">
+                    <label for="student-major" class="block text-sm font-medium text-gray-700 mb-1">Jurusan / Kelas</label>
+                    <input type="text" id="student-major" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Contoh: IPA 12 / RPL">
                 </div>
-                <button type="submit" class="btn-primary w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition duration-150 flex items-center justify-center space-x-2">
-                    <i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>Lanjutkan ke Aplikasi</span>
+                <button type="submit" class="btn-primary w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-sky-700 transition duration-150 flex items-center justify-center space-x-2 shadow-lg">
+                    <i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>Mulai Belajar</span>
                 </button>
             </form>
         </div>
     </div>
 
-    <div id="gurubk-data-form" class="absolute inset-0 z-40 flex items-center justify-center p-4 bg-gray-100 hidden">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full">
-            <i data-lucide="user-cog" class="w-12 h-12 text-green-600 mx-auto mb-4"></i>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Lengkapi Data Guru BK</h2>
-            <p class="text-gray-600 mb-8 text-center">Isi data profil Anda.</p>
+    <div id="gurubk-data-form" class="absolute inset-0 z-40 flex items-center justify-center p-4 bg-amber-50 hidden">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border-t-8 border-amber-500">
+            <i data-lucide="user-cog" class="w-12 h-12 text-amber-600 mx-auto mb-4"></i>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Data Guru BK</h2>
+            <p class="text-gray-600 mb-8 text-center">Siap membimbing siswa.</p>
             <form id="gurubk-info-form">
                 <div class="mb-4">
                     <label for="gurubk-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                    <input type="text" id="gurubk-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Contoh: Ibu S.Pd">
+                    <input type="text" id="gurubk-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50" placeholder="Contoh: Ibu S.Pd">
                 </div>
                 <div class="mb-6">
                     <label for="gurubk-phone" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
-                    <input type="tel" id="gurubk-phone" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Contoh: 081234567890">
+                    <input type="tel" id="gurubk-phone" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50" placeholder="Contoh: 081234567890">
                 </div>
-                <button type="submit" class="btn-primary w-full bg-green-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-700 transition duration-150 flex items-center justify-center space-x-2">
+                <button type="submit" class="btn-primary w-full bg-amber-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-amber-700 transition duration-150 flex items-center justify-center space-x-2 shadow-lg">
                     <i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>Masuk ke Panel Guru BK</span>
                 </button>
             </form>
@@ -111,16 +112,16 @@
     </div>
     
     <div id="admin-data-form" class="absolute inset-0 z-40 flex items-center justify-center p-4 bg-gray-100 hidden">
-        <div class="bg-white p-8 rounded-xl shadow-2xl max-w-md w-full">
-            <i data-lucide="server-cog" class="w-12 h-12 text-slate-800 mx-auto mb-4"></i>
-            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Lengkapi Data Admin</h2>
-            <p class="text-gray-600 mb-8 text-center">Isi nama admin pengelola.</p>
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border-t-8 border-gray-800">
+            <i data-lucide="server-cog" class="w-12 h-12 text-gray-800 mx-auto mb-4"></i>
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Data Admin</h2>
+            <p class="text-gray-600 mb-8 text-center">Pengelola seluruh sistem.</p>
             <form id="admin-info-form">
                 <div class="mb-6">
                     <label for="admin-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Admin</label>
-                    <input type="text" id="admin-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-slate-500 focus:border-slate-500" placeholder="Contoh: Pengelola Sistem">
+                    <input type="text" id="admin-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-gray-800 focus:border-gray-800 bg-gray-50" placeholder="Contoh: Pengelola Sistem">
                 </div>
-                <button type="submit" class="btn-primary w-full bg-slate-800 text-white font-bold py-3 px-4 rounded-xl hover:bg-slate-900 transition duration-150 flex items-center justify-center space-x-2">
+                <button type="submit" class="btn-primary w-full bg-gray-800 text-white font-bold py-3 px-4 rounded-xl hover:bg-gray-900 transition duration-150 flex items-center justify-center space-x-2 shadow-lg">
                     <i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>Masuk ke Panel Admin</span>
                 </button>
             </form>
@@ -130,8 +131,8 @@
 
     <!-- Main App Container -->
     <div id="main-app-container" class="flex flex-1 hidden">
-        <nav id="mobile-nav" class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-lg z-20 md:hidden"></nav>
-        <aside id="desktop-nav" class="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 p-4 shadow-md"></aside>
+        <nav id="mobile-nav" class="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 shadow-2xl z-20 md:hidden"></nav>
+        <aside id="desktop-nav" class="hidden md:flex flex-col w-72 bg-white border-r border-gray-200 p-6 shadow-xl"></aside>
 
         <!-- Content Area -->
         <main class="flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-y-auto">
@@ -140,33 +141,35 @@
             <div id="student-view" class="h-full w-full hidden">
                 <!-- Tab: Materi Motivasi -->
                 <div id="tab-materi" class="tab-content hidden">
-                    <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Materi Motivasi Diri</h2>
-                    <p class="text-gray-600 mb-8">Temukan inspirasi harian dan tips untuk meningkatkan potensi diri Anda di sini.</p>
-                    <div id="motivational-posts-list" class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"></div>
+                    <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-sky-400 pb-2">Materi Inspirasi</h2>
+                    <p class="text-gray-600 mb-8 font-medium">Temukan semangat baru dan tips yang relevan untuk perkembangan akademik dan pribadi Anda.</p>
+                    <div id="motivational-posts-list" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"></div>
                 </div>
 
                 <!-- Tab: Janji Temu BK -->
                 <div id="tab-appointment" class="tab-content hidden">
-                    <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Jadwalkan Janji Temu BK</h2>
-                    <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-4">Buat Janji Baru</h3>
+                    <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-sky-400 pb-2">Jadwal Konseling</h2>
+                    <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 border-t-8 border-amber-400">
+                        <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center text-amber-600"><i data-lucide="calendar-plus" class="w-6 h-6 mr-2"></i>Buat Janji Baru</h3>
                         <form id="appointment-form">
-                            <div class="mb-4">
-                                <label for="appointment-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                                <input type="date" id="appointment-date" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            <div class="mb-4">
-                                <label for="appointment-time" class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
-                                <input type="time" id="appointment-time" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="mb-4">
+                                    <label for="appointment-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                                    <input type="date" id="appointment-date" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50">
+                                </div>
+                                <div class="mb-4">
+                                    <label for="appointment-time" class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
+                                    <input type="time" id="appointment-time" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50">
+                                </div>
                             </div>
                             <div class="mb-6">
                                 <label for="appointment-reason" class="block text-sm font-medium text-gray-700 mb-1">Alasan Singkat Konseling</label>
-                                <textarea id="appointment-reason" rows="3" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Contoh: Kesulitan mengatur waktu belajar..."></textarea>
+                                <textarea id="appointment-reason" rows="3" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Contoh: Kesulitan mengatur waktu belajar..."></textarea>
                             </div>
-                            <button type="submit" class="btn-primary w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition">Kirim Permintaan</button>
+                            <button type="submit" class="btn-primary w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-sky-700 transition shadow-md">Kirim Permintaan</button>
                         </form>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-800 mb-4 mt-8">Riwayat Janji Temu Anda</h3>
+                    <h3 class="text-3xl font-bold text-gray-800 mb-4 mt-8">Riwayat Janji Temu Saya</h3>
                     <div id="appointments-list" class="space-y-4">
                         <p id="no-appointments" class="text-gray-500 italic hidden">Belum ada janji temu.</p>
                     </div>
@@ -174,27 +177,27 @@
 
                 <!-- Tab: Chat Privasi -->
                 <div id="tab-chat" class="tab-content hidden h-full flex flex-col">
-                    <h2 class="text-3xl font-extrabold text-gray-800 mb-4">Chat Privasi dengan Guru BK</h2>
-                    <p class="text-gray-600 mb-6">Guru BK akan membalas pesan Anda di sini.</p>
-                    <div class="bg-green-50 p-4 rounded-xl shadow-md mb-6 border border-green-200">
+                    <h2 class="text-4xl font-extrabold text-gray-800 mb-4 border-b-4 border-sky-400 pb-2">Ruang Chat Privasi</h2>
+                    <p class="text-gray-600 mb-6 font-medium">Saluran rahasia Anda untuk berkomunikasi langsung dengan Guru BK.</p>
+                    <div class="bg-amber-50 p-4 rounded-2xl shadow-md mb-6 border border-amber-200">
                          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                             <div class="flex items-center">
-                                <i data-lucide="phone-call" class="w-6 h-6 text-green-600 mr-3"></i>
+                                <i data-lucide="phone-call" class="w-6 h-6 text-amber-600 mr-3"></i>
                                 <div>
-                                    <p class="text-sm font-semibold text-green-700">Hubungi Cepat Guru BK via WhatsApp:</p>
-                                    <a href="tel:+6285694009155" class="text-lg font-bold text-green-800 hover:underline">085694009155</a>
+                                    <p class="text-sm font-semibold text-amber-700">Hubungi Cepat Guru BK (Nomor Contoh):</p>
+                                    <a href="tel:+6285694009155" class="text-lg font-bold text-amber-800 hover:underline">085694009155</a>
                                 </div>
                             </div>
-                            <a href="https://wa.me/6285694009155" target="_blank" class="w-full sm:w-auto bg-green-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-green-700 transition duration-150 flex items-center justify-center space-x-2">
+                            <a href="https://wa.me/6285694009155" target="_blank" class="w-full sm:w-auto bg-amber-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-amber-700 transition duration-150 flex items-center justify-center space-x-2 shadow-md">
                                 <i data-lucide="message-square" class="w-4 h-4"></i><span>Chat di WhatsApp</span>
                             </a>
                         </div>
                     </div>
-                    <div class="flex-1 bg-white p-4 rounded-xl shadow-lg flex flex-col overflow-hidden h-[60vh] md:h-[70vh]">
+                    <div class="flex-1 bg-white p-4 rounded-2xl shadow-xl flex flex-col overflow-hidden h-[60vh] md:h-[70vh] border-2 border-sky-100">
                         <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar p-2"></div>
                         <form id="chat-form" class="mt-4 flex space-x-3">
-                            <input type="text" id="chat-input" required placeholder="Ketik pesan Anda..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                            <button type="submit" class="btn-primary bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center">
+                            <input type="text" id="chat-input" required placeholder="Tulis masukan, pertanyaan, atau keluhan Anda..." class="flex-1 p-3 border-2 border-sky-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50">
+                            <button type="submit" class="btn-primary bg-sky-600 text-white p-3 rounded-xl hover:bg-sky-700 transition flex items-center justify-center shadow-md">
                                 <i data-lucide="send" class="w-5 h-5"></i><span class="hidden sm:inline ml-2">Kirim</span>
                             </button>
                         </form>
@@ -204,13 +207,13 @@
             
             <!-- Guru BK View -->
             <div id="gurubk-view" class="h-full w-full hidden">
-                <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Panel Guru BK</h2>
+                <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-amber-400 pb-2">Panel Guru BK</h2>
                 <div id="gurubk-content" class="h-full">
                     <!-- Tab: Antrean Janji Temu -->
                     <div id="tab-gurubk-appointments" class="gurubk-tab-content h-full hidden">
-                         <div class="bg-white p-6 rounded-xl shadow-lg">
-                            <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
-                                <i data-lucide="inbox" class="w-5 h-5 mr-2"></i>Antrean Janji Temu Masuk
+                         <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-amber-500">
+                            <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center text-amber-700">
+                                <i data-lucide="inbox" class="w-6 h-6 mr-2"></i>Antrean Janji Temu Masuk
                             </h3>
                             <div id="gurubk-appointments-list" class="space-y-4">
                                 <p id="no-gurubk-appointments" class="text-gray-500 italic">Tidak ada janji temu baru.</p>
@@ -220,9 +223,9 @@
 
                     <!-- Tab: Chat Siswa -->
                     <div id="tab-gurubk-chat" class="gurubk-tab-content hidden h-full flex flex-col">
-                        <div class="bg-white p-6 rounded-xl shadow-lg flex-1">
-                            <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center">
-                                <i data-lucide="message-circle" class="w-5 h-5 mr-2"></i>Pesan dari Siswa
+                        <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-amber-500 flex-1">
+                            <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center text-amber-700">
+                                <i data-lucide="message-circle-more" class="w-6 h-6 mr-2"></i>Kotak Masuk Chat Siswa
                             </h3>
                             <div id="gurubk-chat-threads" class="space-y-3 max-h-[80vh] overflow-y-auto custom-scrollbar">
                                 <p id="no-chat-threads" class="text-gray-500 italic">Belum ada pesan dari Siswa.</p>
@@ -232,23 +235,23 @@
 
                     <!-- Tab: Kelola Materi -->
                     <div id="tab-gurubk-materi" class="gurubk-tab-content hidden">
-                        <div class="bg-white p-6 rounded-xl shadow-lg mb-6">
-                            <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="file-plus" class="w-5 h-5 mr-2"></i>Buat Materi Baru</h3>
+                        <div class="bg-white p-6 rounded-2xl shadow-xl mb-6 border-t-8 border-sky-500">
+                            <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center text-sky-700"><i data-lucide="book-open-text" class="w-6 h-6 mr-2"></i>Kelola Materi Motivasi</h3>
                             <form id="materi-form">
                                 <input type="hidden" id="materi-id">
                                 <div class="mb-4">
                                     <label for="materi-title" class="block text-sm font-medium text-gray-700 mb-1">Judul Materi</label>
-                                    <input type="text" id="materi-title" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Contoh: 3 Kunci Fokus Belajar">
+                                    <input type="text" id="materi-title" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Contoh: 3 Kunci Fokus Belajar">
                                 </div>
                                 <div class="mb-6">
                                     <label for="materi-content" class="block text-sm font-medium text-gray-700 mb-1">Isi Materi</label>
-                                    <textarea id="materi-content" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500" placeholder="Tuliskan konten motivasi di sini..."></textarea>
+                                    <textarea id="materi-content" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Tuliskan konten motivasi di sini..."></textarea>
                                 </div>
-                                <button type="submit" id="materi-submit-btn" class="btn-primary w-full bg-green-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-700 transition">Tambah Materi</button>
+                                <button type="submit" id="materi-submit-btn" class="btn-primary w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-sky-700 transition shadow-md">Tambah Materi</button>
                             </form>
                         </div>
 
-                        <h3 class="text-2xl font-bold text-gray-800 mb-4 mt-8">Daftar Materi Aktif</h3>
+                        <h3 class="text-3xl font-bold text-gray-800 mb-4 mt-8">Daftar Materi Aktif</h3>
                         <div id="gurubk-materi-list" class="space-y-4">
                             <p id="no-gurubk-materi" class="text-gray-500 italic">Belum ada materi yang dibuat.</p>
                         </div>
@@ -258,60 +261,60 @@
 
             <!-- Admin View -->
             <div id="admin-view" class="h-full w-full hidden">
-                 <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Dashboard Admin Pengelola</h2>
+                 <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-gray-700 pb-2">Dashboard Admin Pengelola</h2>
                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Kolom Pengguna Terdaftar -->
-                    <div class="bg-white p-6 rounded-xl shadow-lg">
-                        <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="users" class="w-5 h-5 mr-2"></i>Pengguna Terdaftar</h3>
+                    <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-gray-700">
+                        <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="users" class="w-6 h-6 mr-2 text-gray-700"></i>Pengguna Terdaftar</h3>
                         <div id="admin-users-list" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar"></div>
                     </div>
                     <!-- Kolom Semua Janji Temu -->
-                    <div class="bg-white p-6 rounded-xl shadow-lg">
-                         <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="clipboard-list" class="w-5 h-5 mr-2"></i>Seluruh Janji Temu</h3>
+                    <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-gray-700">
+                         <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="clipboard-list" class="w-6 h-6 mr-2 text-gray-700"></i>Seluruh Janji Temu</h3>
                          <div id="admin-all-appointments-list" class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar"></div>
                     </div>
                  </div>
                  
                  <!-- Laporan Siswa / Sistem -->
-                 <div class="mt-8 bg-white p-6 rounded-xl shadow-lg border-t-4 border-slate-700">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="book-text" class="w-5 h-5 mr-2"></i>Laporan & Statistik Sistem</h3>
+                 <div class="mt-8 bg-white p-6 rounded-2xl shadow-2xl border-t-8 border-gray-800">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="book-text" class="w-6 h-6 mr-2 text-gray-800"></i>Laporan & Statistik Sistem</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                        <div class="p-3 bg-blue-50 rounded-lg text-center"><p class="text-2xl font-bold text-blue-800" id="stat-students">0</p><p class="text-sm text-blue-600">Total Siswa</p></div>
-                        <div class="p-3 bg-green-50 rounded-lg text-center"><p class="text-2xl font-bold text-green-800" id="stat-appointments">0</p><p class="text-sm text-green-600">Total Janji</p></div>
-                        <div class="p-3 bg-yellow-50 rounded-lg text-center"><p class="text-2xl font-bold text-yellow-800" id="stat-pending">0</p><p class="text-sm text-yellow-600">Janji Tertunda</p></div>
+                        <div class="p-4 bg-sky-50 rounded-xl text-center shadow-inner"><p class="text-3xl font-extrabold text-sky-800" id="stat-students">0</p><p class="text-sm text-sky-600 font-semibold">Total Siswa</p></div>
+                        <div class="p-4 bg-amber-50 rounded-xl text-center shadow-inner"><p class="text-3xl font-extrabold text-amber-800" id="stat-appointments">0</p><p class="text-sm text-amber-600 font-semibold">Total Janji</p></div>
+                        <div class="p-4 bg-yellow-50 rounded-xl text-center shadow-inner"><p class="text-3xl font-extrabold text-yellow-800" id="stat-pending">0</p><p class="text-sm text-yellow-600 font-semibold">Janji Tertunda</p></div>
                     </div>
-                    <button onclick="viewSystemReport()" class="btn-primary w-full bg-slate-700 text-white font-bold py-3 px-4 rounded-xl hover:bg-slate-800 transition flex items-center justify-center space-x-2">
+                    <button onclick="viewSystemReport()" class="btn-primary w-full bg-gray-700 text-white font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition flex items-center justify-center space-x-2 shadow-md">
                         <i data-lucide="download" class="w-5 h-5"></i><span>Lihat Laporan Detail Siswa</span>
                     </button>
                  </div>
             </div>
 
             <!-- Custom Modal -->
-            <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-                <div class="bg-white p-6 rounded-xl shadow-2xl max-w-sm w-full">
-                    <h3 id="modal-title" class="text-xl font-bold mb-3 text-gray-800">Notifikasi</h3>
-                    <div id="modal-message" class="text-gray-600 mb-5 overflow-y-auto max-h-64 whitespace-pre-wrap text-sm"></div>
-                    <button id="modal-close-btn" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Tutup</button>
+            <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full border-t-8 border-sky-500">
+                    <h3 id="modal-title" class="text-2xl font-bold mb-3 text-sky-700 flex items-center"><i data-lucide="bell" class="w-6 h-6 mr-2"></i>Notifikasi</h3>
+                    <div id="modal-message" class="text-gray-600 mb-5 overflow-y-auto max-h-64 whitespace-pre-wrap text-sm border-b pb-3"></div>
+                    <button id="modal-close-btn" class="w-full bg-sky-600 text-white font-bold py-3 rounded-xl hover:bg-sky-700 shadow-md">Tutup</button>
                 </div>
             </div>
 
              <!-- Chat View/Reply Modal for Guru BK -->
-            <div id="chat-reply-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-                <div class="bg-white p-6 rounded-xl shadow-2xl max-w-lg w-full h-[90vh] flex flex-col">
+            <div id="chat-reply-modal" class="fixed inset-0 bg-gray-900 bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-lg w-full h-[90vh] flex flex-col border-t-8 border-amber-500">
                     <div class="flex justify-between items-center mb-4 border-b pb-3">
-                        <h3 class="text-xl font-bold text-gray-800">Chat dengan <span id="chat-reply-student-name"></span></h3>
-                        <button onclick="closeChatReplyModal()" class="text-gray-400 hover:text-gray-600">
+                        <h3 class="text-2xl font-bold text-amber-700">Chat dengan <span id="chat-reply-student-name"></span></h3>
+                        <button onclick="closeChatReplyModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition">
                             <i data-lucide="x" class="w-6 h-6"></i>
                         </button>
                     </div>
                     
-                    <div id="gurubk-specific-chat-messages" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar p-2 mb-4 bg-gray-50 rounded-lg">
+                    <div id="gurubk-specific-chat-messages" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar p-2 mb-4 bg-sky-50 rounded-xl border border-sky-200">
                         <!-- Messages render here -->
                     </div>
                     
                     <form id="gurubk-chat-reply-form" class="flex space-x-3">
-                        <input type="text" id="gurubk-chat-reply-input" required placeholder="Balas pesan siswa..." class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500">
-                        <button type="submit" class="btn-primary bg-green-600 text-white p-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center">
+                        <input type="text" id="gurubk-chat-reply-input" required placeholder="Balas pesan siswa (seperti menggunakan pena)..." class="flex-1 p-3 border-2 border-amber-300 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50">
+                        <button type="submit" class="btn-primary bg-amber-600 text-white p-3 rounded-xl hover:bg-amber-700 transition flex items-center justify-center shadow-md">
                             <i data-lucide="send" class="w-5 h-5"></i><span class="hidden sm:inline ml-2">Balas</span>
                         </button>
                     </form>
@@ -333,8 +336,8 @@
         
         // Use a standard mock post structure.
         let localMotivationalPosts = [
-            { id: 'post1', title: 'Kunci Sukses: Konsistensi Kecil', content: 'Kesuksesan bukanlah hasil dari tindakan besar yang jarang dilakukan, melainkan serangkaian kebiasaan kecil yang diulang setiap hari.', author: 'BK Sekolah' },
-            { id: 'post2', title: 'Mengatasi Prokrastinasi', content: 'Teknik "5 Menit": Mulai tugas yang Anda tunda hanya selama 5 menit. Seringkali, begitu Anda memulai, inersia akan membawa Anda untuk menyelesaikannya lebih lama.', author: 'BK Sekolah' },
+            { id: 'post1', title: 'Kunci Sukses: Konsistensi Kecil', content: 'Kesuksesan bukanlah hasil dari tindakan besar yang jarang dilakukan, melainkan serangkaian kebiasaan kecil yang diulang setiap hari. Mulailah dari langkah termudah.', author: 'BK Sekolah' },
+            { id: 'post2', title: 'Mengatasi Prokrastinasi', content: 'Teknik "5 Menit": Mulai tugas yang Anda tunda hanya selama 5 menit. Seringkali, begitu Anda memulai, inersia akan membawa Anda untuk menyelesaikannya lebih lama. Jangan takut memulai.', author: 'BK Sekolah' },
         ];
         
         let localAppointments = [];
@@ -378,6 +381,7 @@
             document.getElementById('modal-title').textContent = title;
             document.getElementById('modal-message').innerHTML = message;
             document.getElementById('custom-modal').classList.remove('hidden');
+            lucide.createIcons();
         }
         document.getElementById('modal-close-btn').onclick = () => document.getElementById('custom-modal').classList.add('hidden');
         function closeChatReplyModal() { document.getElementById('chat-reply-modal').classList.add('hidden'); currentChatStudentId = null; }
@@ -451,12 +455,12 @@
         function setActiveTab(tabName) {
             studentTabs.forEach(tab => {
                 document.getElementById(`tab-${tab}`).classList.add('hidden');
-                document.querySelector(`#desktop-nav .tab-${tab}`)?.classList.remove('bg-blue-100', 'text-blue-700', 'font-semibold');
-                document.querySelector(`#mobile-nav .tab-${tab}`)?.classList.remove('text-blue-600');
+                document.querySelector(`#desktop-nav .tab-${tab}`)?.classList.remove('bg-sky-100', 'text-sky-700', 'font-bold', 'border-r-4');
+                document.querySelector(`#mobile-nav .tab-${tab}`)?.classList.remove('text-sky-600');
             });
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            document.querySelector(`#desktop-nav .tab-${tabName}`)?.classList.add('bg-blue-100', 'text-blue-700', 'font-semibold');
-            document.querySelector(`#mobile-nav .tab-${tabName}`)?.classList.add('text-blue-600');
+            document.querySelector(`#desktop-nav .tab-${tabName}`)?.classList.add('bg-sky-100', 'text-sky-700', 'font-bold', 'border-r-4', 'border-sky-500');
+            document.querySelector(`#mobile-nav .tab-${tabName}`)?.classList.add('text-sky-600');
             if (tabName === 'chat') setTimeout(() => document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight, 50);
             lucide.createIcons();
         }
@@ -467,10 +471,10 @@
         function setActiveGuruBkTab(tabName) {
             gurubkTabs.forEach(tab => {
                 document.getElementById(`tab-gurubk-${tab}`).classList.add('hidden');
-                document.querySelector(`#desktop-nav .tab-gurubk-${tab}`)?.classList.remove('bg-green-100', 'text-green-700', 'font-semibold');
+                document.querySelector(`#desktop-nav .tab-gurubk-${tab}`)?.classList.remove('bg-amber-100', 'text-amber-700', 'font-bold', 'border-r-4');
             });
             document.getElementById(`tab-gurubk-${tabName}`).classList.remove('hidden');
-            document.querySelector(`#desktop-nav .tab-gurubk-${tabName}`)?.classList.add('bg-green-100', 'text-green-700', 'font-semibold');
+            document.querySelector(`#desktop-nav .tab-gurubk-${tabName}`)?.classList.add('bg-amber-100', 'text-amber-700', 'font-bold', 'border-r-4', 'border-amber-500');
             if (tabName === 'chat') renderGurubkChatThreads();
             if (tabName === 'materi') renderMateriManagementList();
             lucide.createIcons();
@@ -481,10 +485,10 @@
         // --- Layout Loaders ---
         function loadStudentLayout() {
             // Mobile Nav
-            const mobileNavHtml = `<div class="flex justify-around items-center h-16"><button onclick="setActiveTab('materi')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span class="text-xs mt-1">Motivasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span class="text-xs mt-1">Janji Temu</span></button><button onclick="setActiveTab('chat')" class="nav-btn text-gray-600 hover:text-blue-600 flex flex-col items-center p-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span class="text-xs mt-1">Chat</span></button></div><button onclick="returnToRoleSelector()" class="w-full bg-red-500 text-white text-xs font-medium py-2 flex items-center justify-center space-x-1"><i data-lucide="log-out" class="w-4 h-4"></i><span>Logout</span></button>`;
+            const mobileNavHtml = `<div class="flex justify-around items-center h-16"><button onclick="setActiveTab('materi')" class="nav-btn text-gray-600 hover:text-sky-600 flex flex-col items-center p-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span class="text-xs mt-1 font-medium">Motivasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn text-gray-600 hover:text-sky-600 flex flex-col items-center p-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span class="text-xs mt-1 font-medium">Janji Temu</span></button><button onclick="setActiveTab('chat')" class="nav-btn text-gray-600 hover:text-sky-600 flex flex-col items-center p-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span class="text-xs mt-1 font-medium">Chat</span></button></div><button onclick="returnToRoleSelector()" class="w-full bg-red-600 text-white text-xs font-medium py-2 flex items-center justify-center space-x-1 hover:bg-red-700"><i data-lucide="log-out" class="w-4 h-4"></i><span>Keluar</span></button>`;
             document.getElementById('mobile-nav').innerHTML = mobileNavHtml;
             // Desktop Nav
-            const sidebarHtml = `<h1 class="text-2xl font-bold text-blue-700 mb-6 flex items-center"><i data-lucide="graduation-cap" class="w-7 h-7 mr-2"></i>Sistem BK</h1><div class="flex flex-col space-y-2"><button onclick="setActiveTab('materi')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span>Materi Motivasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span>Janji Temu</span></button><button onclick="setActiveTab('chat')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-blue-50 flex items-center space-x-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span>Chat Privasi</span></button></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Siswa:</p><p id="user-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
+            const sidebarHtml = `<h1 class="text-3xl font-extrabold text-sky-700 mb-8 flex items-center"><i data-lucide="school" class="w-8 h-8 mr-2"></i>BK Hub</h1><div class="flex flex-col space-y-2"><button onclick="setActiveTab('materi')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-sky-50 flex items-center space-x-3 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span>Materi Inspirasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-sky-50 flex items-center space-x-3 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span>Jadwal Konseling</span></button><button onclick="setActiveTab('chat')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-sky-50 flex items-center space-x-3 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span>Chat Privasi</span></button></div><div class="mt-auto pt-6 border-t border-gray-100"><p class="text-xs text-gray-500">Profil Siswa:</p><p id="user-name-display" class="text-lg font-bold text-gray-800 break-words mb-2"></p><div id="auth-status" class="mt-2 text-xs font-medium text-sky-600"></div><button onclick="returnToRoleSelector()" class="w-full mt-4 text-sm text-red-600 hover:text-red-800 flex items-center justify-center font-semibold"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Keluar Akun</button></div>`;
             document.getElementById('desktop-nav').innerHTML = sidebarHtml;
             setActiveTab('materi');
             document.getElementById('mobile-nav').classList.remove('hidden');
@@ -494,14 +498,14 @@
             // Mobile navigation is hidden for Guru BK/Admin to force desktop-like interface on mobile
             document.getElementById('mobile-nav').classList.add('hidden');
             // Desktop Nav (Sidebar)
-            const sidebarHtml = `<h1 class="text-2xl font-bold text-green-700 mb-6 flex items-center"><i data-lucide="shield-check" class="w-7 h-7 mr-2"></i>Panel BK</h1><div class="flex flex-col space-y-2"><button onclick="setActiveGuruBkTab('appointments')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-green-50 flex items-center space-x-2 tab-gurubk-appointments"><i data-lucide="clipboard-list" class="w-5 h-5"></i><span>Antrean Konseling</span></button><button onclick="setActiveGuruBkTab('chat')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-green-50 flex items-center space-x-2 tab-gurubk-chat"><i data-lucide="message-circle-more" class="w-5 h-5"></i><span>Kotak Masuk Chat</span></button><button onclick="setActiveGuruBkTab('materi')" class="nav-btn w-full text-left p-3 rounded-lg text-gray-700 hover:bg-green-50 flex items-center space-x-2 tab-gurubk-materi"><i data-lucide="book-open-text" class="w-5 h-5"></i><span>Kelola Materi</span></button></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Guru BK:</p><p id="gurubk-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
+            const sidebarHtml = `<h1 class="text-3xl font-extrabold text-amber-700 mb-8 flex items-center"><i data-lucide="pencil-ruler" class="w-8 h-8 mr-2"></i>BK Mentor</h1><div class="flex flex-col space-y-2"><button onclick="setActiveGuruBkTab('appointments')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-amber-50 flex items-center space-x-3 tab-gurubk-appointments"><i data-lucide="clipboard-list" class="w-5 h-5"></i><span>Antrean Konseling</span></button><button onclick="setActiveGuruBkTab('chat')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-amber-50 flex items-center space-x-3 tab-gurubk-chat"><i data-lucide="message-circle-more" class="w-5 h-5"></i><span>Kotak Masuk Chat</span></button><button onclick="setActiveGuruBkTab('materi')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-amber-50 flex items-center space-x-3 tab-gurubk-materi"><i data-lucide="book-open-text" class="w-5 h-5"></i><span>Kelola Materi</span></button></div><div class="mt-auto pt-6 border-t border-gray-100"><p class="text-xs text-gray-500">Profil Guru BK:</p><p id="gurubk-name-display" class="text-lg font-bold text-gray-800 break-words mb-2"></p><div id="auth-status" class="mt-2 text-xs font-medium text-amber-600"></div><button onclick="returnToRoleSelector()" class="w-full mt-4 text-sm text-red-600 hover:text-red-800 flex items-center justify-center font-semibold"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Keluar Akun</button></div>`;
             document.getElementById('desktop-nav').innerHTML = sidebarHtml;
             setActiveGuruBkTab('appointments');
         }
 
         function loadAdminLayout() {
             document.getElementById('mobile-nav').classList.add('hidden');
-            const sidebarHtml = `<h1 class="text-2xl font-bold text-slate-800 mb-6 flex items-center"><i data-lucide="server" class="w-7 h-7 mr-2"></i>Panel Admin</h1><div class="flex flex-col space-y-2"><div class="w-full text-left p-3 rounded-lg bg-slate-200 text-slate-800 font-semibold flex items-center space-x-2"><i data-lucide="database" class="w-5 h-5"></i><span>Dashboard Utama</span></div></div><div class="mt-auto pt-4 border-t border-gray-100"><p class="text-xs text-gray-500">Nama Admin:</p><p id="admin-name-display" class="text-md font-semibold text-gray-800 break-words"></p><div id="auth-status" class="mt-2 text-xs font-medium"></div><button onclick="returnToRoleSelector()" class="w-full mt-2 text-xs text-red-500 hover:text-red-700 flex items-center justify-center"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Logout</button></div>`;
+            const sidebarHtml = `<h1 class="text-3xl font-extrabold text-gray-800 mb-8 flex items-center"><i data-lucide="hard-hat" class="w-8 h-8 mr-2"></i>BK Admin</h1><div class="flex flex-col space-y-2"><div class="w-full text-left p-4 rounded-xl bg-gray-100 text-gray-800 font-bold flex items-center space-x-3 border-r-4 border-gray-700"><i data-lucide="database" class="w-5 h-5"></i><span>Dashboard Utama</span></div></div><div class="mt-auto pt-6 border-t border-gray-100"><p class="text-xs text-gray-500">Profil Admin:</p><p id="admin-name-display" class="text-lg font-bold text-gray-800 break-words mb-2"></p><div id="auth-status" class="mt-2 text-xs font-medium text-gray-600"></div><button onclick="returnToRoleSelector()" class="w-full mt-4 text-sm text-red-600 hover:text-red-800 flex items-center justify-center font-semibold"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Keluar Akun</button></div>`;
             document.getElementById('desktop-nav').innerHTML = sidebarHtml;
         }
 
@@ -528,14 +532,14 @@
         });
         
         // --- Student Features ---
-        const renderMotivationalPosts = () => { document.getElementById('motivational-posts-list').innerHTML = localMotivationalPosts.map(post => `<div class="bg-white p-6 rounded-xl shadow-md border-t-4 border-blue-500 hover:shadow-xl transition duration-200"><h4 class="text-xl font-bold text-gray-800 mb-2">${post.title}</h4><p class="text-gray-600 mb-4 line-clamp-3">${post.content}</p><p class="text-xs text-blue-500 font-medium">Oleh: ${post.author}</p></div>`).join(''); };
+        const renderMotivationalPosts = () => { document.getElementById('motivational-posts-list').innerHTML = localMotivationalPosts.map(post => `<div class="bg-white p-6 rounded-2xl shadow-xl border-l-8 border-sky-400 hover:shadow-2xl transition duration-200"><h4 class="text-xl font-bold text-gray-800 mb-2">${post.title}</h4><p class="text-gray-600 mb-4 line-clamp-3">${post.content}</p><p class="text-xs text-sky-500 font-medium flex items-center"><i data-lucide="user-check" class="w-4 h-4 mr-1"></i>Oleh: ${post.author}</p></div>`).join(''); lucide.createIcons(); };
         
         document.getElementById('appointment-form').addEventListener('submit', (e) => {
             e.preventDefault();
             localAppointments.unshift({ id: `app_${Date.now()}`, date: document.getElementById('appointment-date').value, time: document.getElementById('appointment-time').value, reason: document.getElementById('appointment-reason').value.trim(), studentId: userId, studentName: studentProfile.fullName, status: 'Pending', createdAt: new Date() });
             renderAppointments();
             saveDataToLocalStorage();
-            showCustomModal('Sukses', 'Permintaan janji temu berhasil dikirim.');
+            showCustomModal('Permintaan Terkirim!', 'Permintaan janji temu Anda berhasil dicatat. Guru BK akan segera mengonfirmasi jadwal Anda.');
             e.target.reset();
         });
 
@@ -543,7 +547,7 @@
             const list = document.getElementById('appointments-list'), noApps = document.getElementById('no-appointments');
             const studentAppointments = localAppointments.filter(app => app.studentId === userId);
             noApps.classList.toggle('hidden', studentAppointments.length > 0);
-            list.innerHTML = studentAppointments.map(app => `<div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-500"><div class="flex justify-between items-start"><p class="font-bold text-gray-800 text-lg">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-600 mt-2">Alasan: ${app.reason}</p><p class="text-xs text-gray-400 mt-2">Diajukan: ${app.createdAt.toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`).join('');
+            list.innerHTML = studentAppointments.map(app => `<div class="bg-white p-4 rounded-xl shadow-md border-l-8 ${app.status === 'Confirmed' ? 'border-green-500' : app.status === 'Rejected' ? 'border-red-500' : 'border-yellow-500'}"><div class="flex justify-between items-start"><p class="font-bold text-gray-800 text-lg">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-600 mt-2">Alasan: ${app.reason}</p><p class="text-xs text-gray-400 mt-2">Diajukan: ${new Date(app.createdAt).toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`).join('');
         };
         
         document.getElementById('chat-form').addEventListener('submit', (e) => {
@@ -562,10 +566,10 @@
             const studentMessages = localChatMessages.filter(msg => msg.senderId === userId || msg.recipientId === userId);
             
             list.innerHTML = studentMessages.map(msg => {
-                // If message is from student or for student from BK, it belongs to this thread
-                const isUser = msg.role === 'student'; // True if message is from student
+                // True if message is from student
+                const isUser = msg.role === 'student'; 
                 
-                return `<div class="max-w-[80%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm"><p>${!isUser ? `<span class="font-bold">Guru BK</span>: ` : ''}${msg.message}</p><p class="text-xs ${isUser ? 'text-blue-200' : 'text-gray-500'} text-right mt-1">${msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`;
+                return `<div class="max-w-[85%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm"><p>${!isUser ? `<span class="font-bold">Guru BK</span>: ` : ''}${msg.message}</p><p class="text-xs ${isUser ? 'text-sky-100' : 'text-amber-500'} text-right mt-1">${msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`;
             }).join('');
             list.scrollTop = list.scrollHeight;
         };
@@ -584,7 +588,7 @@
                 renderGuruBkAppointments();
                 renderAppointments(); // Update student view if needed
                 saveDataToLocalStorage();
-                showCustomModal('Sukses', `Status Janji Temu diperbarui menjadi **${newStatus}**.`);
+                showCustomModal('Aksi Berhasil', `Status Janji Temu diperbarui menjadi **${newStatus}**.`);
             }
         };
 
@@ -592,7 +596,7 @@
             const list = document.getElementById('gurubk-appointments-list'), noApps = document.getElementById('no-gurubk-appointments');
             const pending = localAppointments.filter(app => app.status !== 'Completed').sort((a,b) => b.createdAt - a.createdAt);
             noApps.classList.toggle('hidden', pending.length > 0);
-            list.innerHTML = pending.map(app => `<div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm"><div class="flex justify-between items-start mb-2"><p class="font-bold text-lg text-gray-800">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-700">Oleh: <span class="font-semibold">${app.studentName}</span></p><p class="text-sm text-gray-600 mt-1">Alasan: ${app.reason}</p><div class="mt-4 pt-3 border-t border-gray-200 flex flex-wrap gap-2"><button onclick="updateAppointmentStatus('${app.id}', 'Confirmed')" class="btn-primary flex-1 bg-green-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-green-600">Konfirmasi</button><button onclick="updateAppointmentStatus('${app.id}', 'Rejected')" class="btn-primary flex-1 bg-red-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-red-600">Tolak</button><button onclick="updateAppointmentStatus('${app.id}', 'Completed')" class="btn-secondary flex-1 bg-blue-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-blue-600">Selesaikan</button></div></div>`).join('');
+            list.innerHTML = pending.map(app => `<div class="bg-amber-50 p-4 rounded-xl border border-amber-200 shadow-md"><div class="flex justify-between items-start mb-2"><p class="font-bold text-lg text-gray-800">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-700">Oleh: <span class="font-semibold">${app.studentName}</span></p><p class="text-sm text-gray-600 mt-1">Alasan: ${app.reason}</p><div class="mt-4 pt-3 border-t border-gray-200 flex flex-wrap gap-2"><button onclick="updateAppointmentStatus('${app.id}', 'Confirmed')" class="btn-primary flex-1 bg-green-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-green-600 shadow-sm">Konfirmasi</button><button onclick="updateAppointmentStatus('${app.id}', 'Rejected')" class="btn-primary flex-1 bg-red-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-red-600 shadow-sm">Tolak</button><button onclick="updateAppointmentStatus('${app.id}', 'Completed')" class="btn-secondary flex-1 bg-sky-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-sky-600 shadow-sm">Selesaikan</button></div></div>`).join('');
             lucide.createIcons();
         };
         
@@ -621,10 +625,10 @@
             noThreads.classList.toggle('hidden', threads.length > 0);
 
             list.innerHTML = threads.map(thread => `
-                <div onclick="openChatReplyModal('${thread.studentId}', '${thread.studentName}')" class="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 cursor-pointer transition">
+                <div onclick="openChatReplyModal('${thread.studentId}', '${thread.studentName}')" class="p-4 bg-sky-50 hover:bg-sky-100 rounded-xl border border-sky-200 cursor-pointer transition shadow-sm">
                     <div class="flex justify-between items-center">
                         <p class="font-bold text-gray-800">${thread.studentName}</p>
-                        <p class="text-xs text-gray-500">${thread.latestTimestamp.toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p class="text-xs text-gray-500">${thread.latestTimestamp.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
                     </div>
                     <p class="text-sm text-gray-600 mt-1 line-clamp-1">${thread.latestMessageText}</p>
                 </div>
@@ -641,7 +645,7 @@
                  
                  chatList.innerHTML = threadMessages.map(msg => {
                     const isGuruBk = msg.role === 'gurubk';
-                    return `<div class="max-w-[80%] ${isGuruBk ? 'chat-message-bk ml-auto' : 'chat-message-user mr-auto'} p-3 text-sm"><p class="font-semibold">${isGuruBk ? 'Anda (BK):' : msg.senderName}:</p><p>${msg.message}</p><p class="text-xs ${isGuruBk ? 'text-gray-500' : 'text-blue-200'} text-right mt-1">${msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`;
+                    return `<div class="max-w-[85%] ${isGuruBk ? 'chat-message-bk ml-auto' : 'chat-message-user mr-auto'} p-3 text-sm"><p class="font-semibold">${isGuruBk ? 'Anda (BK):' : msg.senderName}:</p><p>${msg.message}</p><p class="text-xs ${isGuruBk ? 'text-amber-500' : 'text-sky-100'} text-right mt-1">${msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`;
                 }).join('');
                 chatList.scrollTop = chatList.scrollHeight;
             };
@@ -681,13 +685,13 @@
             noMateri.classList.toggle('hidden', localMotivationalPosts.length > 0);
 
             list.innerHTML = localMotivationalPosts.map(post => `
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
+                <div class="bg-sky-50 p-4 rounded-xl border border-sky-200 shadow-md">
                     <p class="font-bold text-lg text-gray-800">${post.title}</p>
                     <p class="text-sm text-gray-600 mt-1 line-clamp-2">${post.content}</p>
-                    <p class="text-xs text-gray-400 mt-2">Oleh: ${post.author}</p>
+                    <p class="text-xs text-sky-500 mt-2">Oleh: ${post.author}</p>
                     <div class="mt-3 border-t border-gray-200 pt-3 flex gap-2">
-                        <button onclick="editMateri('${post.id}')" class="btn-secondary bg-blue-500 text-white text-xs py-1.5 px-3 rounded-lg hover:bg-blue-600 flex items-center space-x-1"><i data-lucide="edit-3" class="w-4 h-4"></i><span>Edit</span></button>
-                        <button onclick="deleteMateri('${post.id}')" class="btn-secondary bg-red-500 text-white text-xs py-1.5 px-3 rounded-lg hover:bg-red-600 flex items-center space-x-1"><i data-lucide="trash-2" class="w-4 h-4"></i><span>Hapus</span></button>
+                        <button onclick="editMateri('${post.id}')" class="btn-secondary bg-amber-500 text-gray-800 text-xs py-1.5 px-3 rounded-lg hover:bg-amber-600 flex items-center space-x-1 shadow-sm"><i data-lucide="edit-3" class="w-4 h-4"></i><span>Edit</span></button>
+                        <button onclick="deleteMateri('${post.id}')" class="btn-secondary bg-red-500 text-white text-xs py-1.5 px-3 rounded-lg hover:bg-red-600 flex items-center space-x-1 shadow-sm"><i data-lucide="trash-2" class="w-4 h-4"></i><span>Hapus</span></button>
                     </div>
                 </div>
             `).join('');
@@ -706,12 +710,12 @@
                 const index = localMotivationalPosts.findIndex(p => p.id === id);
                 if (index > -1) {
                     localMotivationalPosts[index] = { ...localMotivationalPosts[index], title, content, author };
-                    showCustomModal('Sukses', 'Materi berhasil diperbarui.');
+                    showCustomModal('Perubahan Disimpan', 'Materi berhasil diperbarui.');
                 }
             } else {
                 // Add new post
                 localMotivationalPosts.unshift({ id: `post_${Date.now()}`, title, content, author });
-                showCustomModal('Sukses', 'Materi baru berhasil ditambahkan.');
+                showCustomModal('Materi Baru Ditambahkan', 'Materi baru berhasil ditambahkan dan siap dilihat siswa.');
             }
             
             saveDataToLocalStorage();
@@ -741,7 +745,7 @@
                 saveDataToLocalStorage();
                 renderMateriManagementList();
                 renderMotivationalPosts();
-                showCustomModal('Sukses', 'Materi berhasil dihapus.');
+                showCustomModal('Materi Dihapus', 'Materi berhasil dihapus.');
             }
         };
 
@@ -762,22 +766,23 @@
             let allUsers = [];
             if (studentProfile) allUsers.push(studentProfile);
             if (guruBkProfile) allUsers.push(guruBkProfile);
-            usersList.innerHTML = allUsers.length > 0 ? allUsers.map(user => `<div class="p-3 rounded-lg ${user.role === 'Siswa' ? 'bg-blue-50' : user.role === 'Guru BK' ? 'bg-green-50' : 'bg-slate-100'} flex justify-between items-center"><div class="font-semibold text-gray-800">${user.fullName}</div><div class="text-xs font-bold ${user.role === 'Siswa' ? 'text-blue-600' : user.role === 'Guru BK' ? 'text-green-600' : 'text-slate-600'}">${user.role}</div></div>`).join('') : `<p class="text-gray-500 italic">Belum ada pengguna terdaftar.</p>`;
+            usersList.innerHTML = allUsers.length > 0 ? allUsers.map(user => `<div class="p-4 rounded-xl shadow-inner ${user.role === 'Siswa' ? 'bg-sky-50 border border-sky-200' : user.role === 'Guru BK' ? 'bg-amber-50 border border-amber-200' : 'bg-gray-100 border border-gray-300'} flex justify-between items-center"><div class="font-bold text-gray-800">${user.fullName}</div><div class="text-sm font-extrabold ${user.role === 'Siswa' ? 'text-sky-600' : user.role === 'Guru BK' ? 'text-amber-600' : 'text-gray-600'}">${user.role}</div></div>`).join('') : `<p class="text-gray-500 italic">Belum ada pengguna terdaftar.</p>`;
 
             // Render All Appointments
             const appointmentsList = document.getElementById('admin-all-appointments-list');
-            appointmentsList.innerHTML = localAppointments.length > 0 ? localAppointments.map(app => `<div class="p-3 rounded-lg bg-gray-50 border border-gray-200"><div class="flex justify-between items-center"><p class="font-semibold text-sm">${app.studentName}</p><span class="status-${app.status} px-2 py-0.5 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-xs text-gray-500">${app.date} - ${app.time}</p></div>`).join('') : `<p class="text-gray-500 italic">Belum ada janji temu dibuat.</p>`;
+            appointmentsList.innerHTML = localAppointments.length > 0 ? localAppointments.map(app => `<div class="p-3 rounded-lg bg-gray-50 border border-gray-200 shadow-sm"><div class="flex justify-between items-center"><p class="font-semibold text-sm">${app.studentName} (${app.studentId})</p><span class="status-${app.status} px-2 py-0.5 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-xs text-gray-500 mt-1">${app.date} - ${app.time} | Alasan: ${app.reason.substring(0, 30)}...</p></div>`).join('') : `<p class="text-gray-500 italic">Belum ada janji temu dibuat.</p>`;
+            lucide.createIcons();
         };
 
         window.viewSystemReport = () => {
-            let reportText = "--- Laporan Detail Sistem BK (Mode Lokal) ---\n\n";
+            let reportText = "=== LAPORAN DETAIL SISTEM BK SEKOLAH ===\n\n";
 
             // 1. Data Siswa
             reportText += `1. DATA PROFIL SISWA (${studentProfile ? 1 : 0} Siswa Terdaftar):\n`;
             if (studentProfile) {
-                reportText += `   - Nama: ${studentProfile.fullName}\n`;
+                reportText += `   - Nama Lengkap: ${studentProfile.fullName}\n`;
                 reportText += `   - Sekolah: ${studentProfile.school}\n`;
-                reportText += `   - Jurusan: ${studentProfile.major}\n`;
+                reportText += `   - Jurusan/Kelas: ${studentProfile.major}\n`;
                 reportText += `   - ID (Lokal): ${studentProfile.id}\n`;
             } else {
                 reportText += "   (Belum ada data siswa)\n";
@@ -798,7 +803,7 @@
             reportText += `3. DATA JANJI TEMU (${localAppointments.length} Total):\n`;
             if (localAppointments.length > 0) {
                 localAppointments.forEach((app, index) => {
-                    reportText += `   ${index + 1}. [${app.status}] ${app.studentName} (${app.date} Pukul ${app.time})\n`;
+                    reportText += `   ${index + 1}. [${app.status}] ${app.studentName} (${app.date} ${app.time})\n`;
                     reportText += `      Alasan: ${app.reason}\n`;
                 });
             } else {
@@ -806,21 +811,31 @@
             }
             reportText += "\n";
 
-            // 4. Data Chat
-            reportText += `4. STATISTIK CHAT (${localChatMessages.length} Total Pesan):\n`;
-            const threads = getUniqueChatSenders();
-            reportText += `   - Jumlah Thread Aktif: ${threads.length}\n`;
-            reportText += `   - Pesan Terakhir:\n`;
-            if (localChatMessages.length > 0) {
-                 const lastMsg = localChatMessages[localChatMessages.length - 1];
-                 const sender = lastMsg.role === 'student' ? lastMsg.senderName : 'Guru BK';
-                 reportText += `     > [${sender}] ${lastMsg.message.substring(0, 40)}...\n`;
+            // 4. Data Materi
+            reportText += `4. KONTEN MATERI MOTIVASI (${localMotivationalPosts.length} Total):\n`;
+            if (localMotivationalPosts.length > 0) {
+                localMotivationalPosts.forEach((post, index) => {
+                    reportText += `   ${index + 1}. Judul: ${post.title}\n`;
+                    reportText += `      Konten: ${post.content.substring(0, 50)}...\n`;
+                });
             } else {
-                reportText += "     (Belum ada pesan)\n";
+                reportText += "   (Tidak ada materi)\n";
             }
             reportText += "\n";
+
+            // 5. Data Chat
+            reportText += `5. STATISTIK CHAT (${localChatMessages.length} Total Pesan):\n`;
+            const threads = getUniqueChatSenders();
+            reportText += `   - Jumlah Thread Aktif (Siswa): ${threads.length}\n`;
+            if (localChatMessages.length > 0) {
+                 const userMsg = localChatMessages.filter(msg => msg.role === 'student').length;
+                 const bkMsg = localChatMessages.filter(msg => msg.role === 'gurubk').length;
+                 reportText += `   - Pesan Siswa: ${userMsg}, Pesan BK: ${bkMsg}\n`;
+            } else {
+                reportText += "   (Belum ada aktivitas chat)\n";
+            }
             
-            showCustomModal('Laporan Detail Siswa', `<pre class="text-xs">${reportText}</pre>`);
+            showCustomModal('Laporan Detail Sistem', `<pre class="text-xs text-left overflow-x-auto p-2 bg-gray-50 rounded-lg">${reportText}</pre>`);
         };
 
 

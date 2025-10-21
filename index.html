@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Load Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         /* Mengatur font default Inter */
         body {
@@ -60,7 +62,7 @@
                 <i data-lucide="shield" class="w-6 h-6"></i>
                 <span>Login Admin (Pengelola Sistem)</span>
             </button>
-            <p id="role-auth-status" class="text-xs text-gray-500 mt-6">Mode Lokal: Data disimpan di browser.</p>
+            <p id="role-auth-status" class="text-xs text-gray-500 mt-6">Mode Online: Data disimpan di Supabase.</p>
         </div>
     </div>
     
@@ -324,61 +326,37 @@
         </main>
     </div>
 
-    <!-- Local App Logic -->
+    <!-- App Logic with Supabase -->
     <script>
-        // --- Global State & Mock Data ---
-        let userRole = null; 
-        let studentProfile = null; 
-        let guruBkProfile = null;
-        let adminProfile = null;
-        // In a real app, this would be dynamic from Firebase Auth
-        let userId = 'local_student_01'; // Static ID for local simulation
-        
-        // Use a standard mock post structure.
-        let localMotivationalPosts = [
-            { id: 'post1', title: 'Kunci Sukses: Konsistensi Kecil', content: 'Kesuksesan bukanlah hasil dari tindakan besar yang jarang dilakukan, melainkan serangkaian kebiasaan kecil yang diulang setiap hari. Mulailah dari langkah termudah.', author: 'BK Sekolah' },
-            { id: 'post2', title: 'Mengatasi Prokrastinasi', content: 'Teknik "5 Menit": Mulai tugas yang Anda tunda hanya selama 5 menit. Seringkali, begitu Anda memulai, inersia akan membawa Anda untuk menyelesaikannya lebih lama. Jangan takut memulai.', author: 'BK Sekolah' },
-        ];
-        
-        let localAppointments = [];
-        let localChatMessages = [];
-        
-        // Variable to track the student currently being replied to by Guru BK
-        let currentChatStudentId = null; 
-        
-        // --- LocalStorage Persistence ---
-        function saveDataToLocalStorage() {
-            localStorage.setItem('bkApp_studentProfile', JSON.stringify(studentProfile));
-            localStorage.setItem('bkApp_guruBkProfile', JSON.stringify(guruBkProfile));
-            localStorage.setItem('bkApp_adminProfile', JSON.stringify(adminProfile));
-            localStorage.setItem('bkApp_appointments', JSON.stringify(localAppointments));
-            localStorage.setItem('bkApp_chatMessages', JSON.stringify(localChatMessages));
-            localStorage.setItem('bkApp_motivationalPosts', JSON.stringify(localMotivationalPosts));
-        }
+        // --- Koneksi ke Supabase ---
+        // PENTING: Ganti nilai di bawah ini dengan URL dan Kunci Anon dari dashboard Supabase Anda.
+        const SUPABASE_URL = 'https://bpquystzpzmwezpephaf.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwcXV5c3R6cHptd2V6cGVwaGFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjM4MjQsImV4cCI6MjA3NjU5OTgyNH0.CGLIirF-HypP4yjsJqy2tagPhm4AQaQpxuvZ7JbfovE';
 
-        function loadDataFromLocalStorage() {
-            studentProfile = JSON.parse(localStorage.getItem('bkApp_studentProfile'));
-            guruBkProfile = JSON.parse(localStorage.getItem('bkApp_guruBkProfile'));
-            adminProfile = JSON.parse(localStorage.getItem('bkApp_adminProfile'));
-            
-            const appointmentsData = JSON.parse(localStorage.getItem('bkApp_appointments')) || [];
-            localAppointments = appointmentsData.map(app => ({...app, createdAt: new Date(app.createdAt) }));
-
-            const chatData = JSON.parse(localStorage.getItem('bkApp_chatMessages')) || [];
-            localChatMessages = chatData.map(msg => ({...msg, timestamp: new Date(msg.timestamp) }));
-            
-            const postsData = JSON.parse(localStorage.getItem('bkApp_motivationalPosts')) || localMotivationalPosts;
-            localMotivationalPosts = postsData;
-
-            // Ensure static studentId is used if studentProfile exists (for chat/app consistency)
-            if (studentProfile) {
-                userId = studentProfile.id || 'local_student_01';
+        // Inisialisasi Supabase Client
+        let supabase; // Variabel untuk menyimpan instance klien Supabase
+        try {
+            // Kita akan mencoba menginisialisasi klien Supabase terlepas dari nilai default,
+            // selama URL dan Kunci ada, untuk memungkinkan pengguna masuk dalam mode simulasi.
+            if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+                // MENGAKSES FUNGSI createClient DARI OBJEK GLOBAL
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else {
+                 console.warn("Supabase credentials not fully provided. App will run in a limited state.");
             }
+        } catch(e) {
+            console.error("Error initializing Supabase client:", e);
         }
+
+        // --- Global State ---
+        let userRole = null; 
+        let userProfile = null;
+        let userId = localStorage.getItem('bkApp_userId'); // Get user ID from local storage to persist session
+        let currentChatStudentId = null; // For Guru BK chat reply
         
         // --- Utility Functions ---
-        function showCustomModal(title, message) {
-            document.getElementById('modal-title').textContent = title;
+        function showCustomModal(title, message) { 
+            document.getElementById('modal-title').innerHTML = `<i data-lucide="${title.toLowerCase().includes('gagal') ? 'alert-triangle' : 'check-circle'}" class="w-6 h-6 mr-2"></i>${title}`;
             document.getElementById('modal-message').innerHTML = message;
             document.getElementById('custom-modal').classList.remove('hidden');
             lucide.createIcons();
@@ -388,59 +366,85 @@
         window.closeChatReplyModal = closeChatReplyModal;
         
         function returnToRoleSelector() { 
-            // Save state before reloading
-            saveDataToLocalStorage();
+            localStorage.removeItem('bkApp_userId');
+            localStorage.removeItem('bkApp_userRole');
+            localStorage.removeItem('bkApp_userId_student');
+            localStorage.removeItem('bkApp_userId_gurubk');
+            localStorage.removeItem('bkApp_userId_admin');
             window.location.reload(); 
         }
         window.returnToRoleSelector = returnToRoleSelector;
 
         // --- Display Info Updaters ---
         const updateDisplayInfo = () => {
-            if (userRole === 'student' && studentProfile) document.getElementById('user-name-display').textContent = studentProfile.fullName;
-            if (userRole === 'gurubk' && guruBkProfile) document.getElementById('gurubk-name-display').textContent = guruBkProfile.fullName;
-            if (userRole === 'admin' && adminProfile) document.getElementById('admin-name-display').textContent = adminProfile.fullName;
+            if (!userProfile) return;
+            // Ini akan membutuhkan elemen display yang belum ada di HTML, biarkan sebagai placeholder.
+            // if (userRole === 'student') document.getElementById('user-name-display').textContent = userProfile.full_name;
+            // if (userRole === 'gurubk') document.getElementById('gurubk-name-display').textContent = userProfile.full_name;
+            // if (userRole === 'admin') document.getElementById('admin-name-display').textContent = userProfile.full_name;
         };
 
         // --- Role & View Management ---
-        function proceedToApp() {
+        async function proceedToApp() {
             ['role-selector', 'student-data-form', 'gurubk-data-form', 'admin-data-form'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById('main-app-container').classList.remove('hidden');
-            
             ['student-view', 'gurubk-view', 'admin-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
 
             if (userRole === 'student') {
                 document.getElementById('student-view').classList.remove('hidden');
                 loadStudentLayout();
-                loadInitialStudentData();
+                await loadInitialStudentData();
             } else if (userRole === 'gurubk') {
                 document.getElementById('gurubk-view').classList.remove('hidden');
                 loadGuruBkLayout();
-                loadInitialGuruBkData(); // New function for BK data
+                await loadInitialGuruBkData();
             } else if (userRole === 'admin') {
                 document.getElementById('admin-view').classList.remove('hidden');
                 loadAdminLayout();
-                renderAdminDashboard();
+                await renderAdminDashboard();
             }
             
             updateDisplayInfo();
-            document.getElementById('auth-status').textContent = `Status: Terhubung (${userRole.toUpperCase()})`;
+            // document.getElementById('auth-status').textContent = `Status: Terhubung (${userRole.toUpperCase()})`; // Elemen ini juga belum ada
             lucide.createIcons();
         }
 
-        function setRoleAndLogin(role) {
+        async function setRoleAndLogin(role) {
             userRole = role;
             
-            // Re-assign userId for student based on local data if exists
-            if (role === 'student' && studentProfile && studentProfile.id) {
-                userId = studentProfile.id;
-            } else if (role === 'student') {
-                userId = `local_student_${Date.now()}`; // New student gets a fresh ID
+            // FIX: Mengganti simulasi ID berbasis timestamp dengan UUID yang valid untuk Supabase
+            let roleSpecificId = localStorage.getItem(`bkApp_userId_${role}`);
+            if (!roleSpecificId) {
+                // Generate a proper UUID structure for Supabase ID compatibility
+                roleSpecificId = crypto.randomUUID(); 
+            }
+            
+            userId = roleSpecificId;
+            localStorage.setItem(`bkApp_userId_${role}`, userId);
+            localStorage.setItem('bkApp_userId', userId);
+            localStorage.setItem('bkApp_userRole', role);
+
+            // Cek di sini, Supabase client harus sudah terinisialisasi
+            if (!supabase) {
+                showCustomModal('Koneksi Gagal', 'Supabase Client gagal diinisialisasi. Periksa kembali URL dan Kunci API Anda, atau coba muat ulang halaman.');
+                return;
             }
 
-            let profileExists = (role === 'student' && studentProfile) || (role === 'gurubk' && guruBkProfile) || (role === 'admin' && adminProfile);
+            // Gunakan userId (UUID yang valid) untuk query
+            const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+            if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+                 console.error("Error fetching profile:", error);
+                 // Tampilkan pesan kesalahan hanya jika itu bukan kesalahan 'not found'
+                 if (error.code !== 'PGRST116') { 
+                     showCustomModal('Error', `Gagal mengambil data profil dari database. Error Code: ${error.code}`);
+                 }
+                 return;
+            }
             
-            if (profileExists) {
-                proceedToApp();
+            userProfile = data;
+
+            if (userProfile) {
+                await proceedToApp();
             } else {
                 document.getElementById('role-selector').classList.add('hidden');
                 document.getElementById(`${role}-data-form`).classList.remove('hidden');
@@ -448,416 +452,511 @@
             }
         }
         window.setRoleAndLogin = setRoleAndLogin;
-
-        // --- Navigation Logic ---
-        // Student Navigation
-        const studentTabs = ['materi', 'appointment', 'chat'];
-        function setActiveTab(tabName) {
-            studentTabs.forEach(tab => {
-                document.getElementById(`tab-${tab}`).classList.add('hidden');
-                document.querySelector(`#desktop-nav .tab-${tab}`)?.classList.remove('bg-sky-100', 'text-sky-700', 'font-bold', 'border-r-4');
-                document.querySelector(`#mobile-nav .tab-${tab}`)?.classList.remove('text-sky-600');
-            });
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            document.querySelector(`#desktop-nav .tab-${tabName}`)?.classList.add('bg-sky-100', 'text-sky-700', 'font-bold', 'border-r-4', 'border-sky-500');
-            document.querySelector(`#mobile-nav .tab-${tabName}`)?.classList.add('text-sky-600');
-            if (tabName === 'chat') setTimeout(() => document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight, 50);
-            lucide.createIcons();
-        }
-        window.setActiveTab = setActiveTab;
         
-        // Guru BK Navigation
-        const gurubkTabs = ['appointments', 'chat', 'materi'];
-        function setActiveGuruBkTab(tabName) {
-            gurubkTabs.forEach(tab => {
-                document.getElementById(`tab-gurubk-${tab}`).classList.add('hidden');
-                document.querySelector(`#desktop-nav .tab-gurubk-${tab}`)?.classList.remove('bg-amber-100', 'text-amber-700', 'font-bold', 'border-r-4');
-            });
-            document.getElementById(`tab-gurubk-${tabName}`).classList.remove('hidden');
-            document.querySelector(`#desktop-nav .tab-gurubk-${tabName}`)?.classList.add('bg-amber-100', 'text-amber-700', 'font-bold', 'border-r-4', 'border-amber-500');
-            if (tabName === 'chat') renderGurubkChatThreads();
-            if (tabName === 'materi') renderMateriManagementList();
+        // --- Navigation Logic (Dummy) ---
+        function navigateToTab(tabId, viewId) {
+            document.querySelectorAll(`#${viewId} .tab-content, #${viewId} .gurubk-tab-content`).forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll(`#mobile-nav button, #desktop-nav button`).forEach(btn => btn.classList.remove('bg-sky-500', 'text-white', 'bg-amber-500', 'text-gray-900'));
+            
+            const roleClass = userRole === 'student' ? 'bg-sky-500 text-white' : 'bg-amber-500 text-gray-900';
+            // FIX: The classList.add method does not support adding multiple classes in one string.
+            // We need to split the string into an array and spread it as arguments.
+            const classesToAdd = roleClass.split(' ');
+            document.querySelector(`[data-tab="${tabId}"]`)?.classList.add(...classesToAdd);
             lucide.createIcons();
         }
-        window.setActiveGuruBkTab = setActiveGuruBkTab;
-
+        window.navigateToTab = navigateToTab;
 
         // --- Layout Loaders ---
         function loadStudentLayout() {
-            // Mobile Nav
-            const mobileNavHtml = `<div class="flex justify-around items-center h-16"><button onclick="setActiveTab('materi')" class="nav-btn text-gray-600 hover:text-sky-600 flex flex-col items-center p-2 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span class="text-xs mt-1 font-medium">Motivasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn text-gray-600 hover:text-sky-600 flex flex-col items-center p-2 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span class="text-xs mt-1 font-medium">Janji Temu</span></button><button onclick="setActiveTab('chat')" class="nav-btn text-gray-600 hover:text-sky-600 flex flex-col items-center p-2 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span class="text-xs mt-1 font-medium">Chat</span></button></div><button onclick="returnToRoleSelector()" class="w-full bg-red-600 text-white text-xs font-medium py-2 flex items-center justify-center space-x-1 hover:bg-red-700"><i data-lucide="log-out" class="w-4 h-4"></i><span>Keluar</span></button>`;
-            document.getElementById('mobile-nav').innerHTML = mobileNavHtml;
-            // Desktop Nav
-            const sidebarHtml = `<h1 class="text-3xl font-extrabold text-sky-700 mb-8 flex items-center"><i data-lucide="school" class="w-8 h-8 mr-2"></i>BK Hub</h1><div class="flex flex-col space-y-2"><button onclick="setActiveTab('materi')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-sky-50 flex items-center space-x-3 tab-materi"><i data-lucide="book-open" class="w-5 h-5"></i><span>Materi Inspirasi</span></button><button onclick="setActiveTab('appointment')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-sky-50 flex items-center space-x-3 tab-appointment"><i data-lucide="calendar-check" class="w-5 h-5"></i><span>Jadwal Konseling</span></button><button onclick="setActiveTab('chat')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-sky-50 flex items-center space-x-3 tab-chat"><i data-lucide="message-circle" class="w-5 h-5"></i><span>Chat Privasi</span></button></div><div class="mt-auto pt-6 border-t border-gray-100"><p class="text-xs text-gray-500">Profil Siswa:</p><p id="user-name-display" class="text-lg font-bold text-gray-800 break-words mb-2"></p><div id="auth-status" class="mt-2 text-xs font-medium text-sky-600"></div><button onclick="returnToRoleSelector()" class="w-full mt-4 text-sm text-red-600 hover:text-red-800 flex items-center justify-center font-semibold"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Keluar Akun</button></div>`;
-            document.getElementById('desktop-nav').innerHTML = sidebarHtml;
-            setActiveTab('materi');
-            document.getElementById('mobile-nav').classList.remove('hidden');
+            const navItems = [
+                { id: 'tab-materi', icon: 'book-open', label: 'Materi' },
+                { id: 'tab-appointment', icon: 'calendar-check', label: 'Janji Temu' },
+                { id: 'tab-chat', icon: 'message-square', label: 'Chat' },
+            ];
+            
+            const createNavHtml = (item, isDesktop) => `
+                <button onclick="navigateToTab('${item.id}', 'student-view')" data-tab="${item.id}" class="w-full flex ${isDesktop ? 'items-center space-x-3 p-3 text-lg rounded-xl hover:bg-sky-50' : 'flex-col items-center justify-center p-2 text-xs transition duration-150'} text-gray-600">
+                    <i data-lucide="${item.icon}" class="${isDesktop ? 'w-6 h-6' : 'w-5 h-5'}"></i>
+                    <span class="${isDesktop ? 'font-medium' : 'mt-1'}">${item.label}</span>
+                </button>
+            `;
+
+            document.getElementById('mobile-nav').innerHTML = navItems.map(item => createNavHtml(item, false)).join('');
+            document.getElementById('desktop-nav').innerHTML = `
+                <div class="flex flex-col space-y-2 mt-4">
+                    ${navItems.map(item => createNavHtml(item, true)).join('')}
+                </div>
+                <div class="mt-auto pt-6 border-t border-gray-200">
+                    <button onclick="returnToRoleSelector()" class="w-full flex items-center space-x-3 p-3 text-lg rounded-xl text-red-600 hover:bg-red-50">
+                        <i data-lucide="log-out" class="w-6 h-6"></i>
+                        <span class="font-medium">Keluar</span>
+                    </button>
+                </div>
+            `;
+            navigateToTab('tab-materi', 'student-view');
         }
 
         function loadGuruBkLayout() {
-            // Mobile navigation is hidden for Guru BK/Admin to force desktop-like interface on mobile
-            document.getElementById('mobile-nav').classList.add('hidden');
-            // Desktop Nav (Sidebar)
-            const sidebarHtml = `<h1 class="text-3xl font-extrabold text-amber-700 mb-8 flex items-center"><i data-lucide="pencil-ruler" class="w-8 h-8 mr-2"></i>BK Mentor</h1><div class="flex flex-col space-y-2"><button onclick="setActiveGuruBkTab('appointments')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-amber-50 flex items-center space-x-3 tab-gurubk-appointments"><i data-lucide="clipboard-list" class="w-5 h-5"></i><span>Antrean Konseling</span></button><button onclick="setActiveGuruBkTab('chat')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-amber-50 flex items-center space-x-3 tab-gurubk-chat"><i data-lucide="message-circle-more" class="w-5 h-5"></i><span>Kotak Masuk Chat</span></button><button onclick="setActiveGuruBkTab('materi')" class="nav-btn w-full text-left p-4 rounded-xl text-gray-700 hover:bg-amber-50 flex items-center space-x-3 tab-gurubk-materi"><i data-lucide="book-open-text" class="w-5 h-5"></i><span>Kelola Materi</span></button></div><div class="mt-auto pt-6 border-t border-gray-100"><p class="text-xs text-gray-500">Profil Guru BK:</p><p id="gurubk-name-display" class="text-lg font-bold text-gray-800 break-words mb-2"></p><div id="auth-status" class="mt-2 text-xs font-medium text-amber-600"></div><button onclick="returnToRoleSelector()" class="w-full mt-4 text-sm text-red-600 hover:text-red-800 flex items-center justify-center font-semibold"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Keluar Akun</button></div>`;
-            document.getElementById('desktop-nav').innerHTML = sidebarHtml;
-            setActiveGuruBkTab('appointments');
+             const navItems = [
+                { id: 'tab-gurubk-appointments', icon: 'calendar-plus', label: 'Janji Temu' },
+                { id: 'tab-gurubk-chat', icon: 'message-circle', label: 'Kotak Masuk' },
+                { id: 'tab-gurubk-materi', icon: 'list-checks', label: 'Kelola Materi' },
+            ];
+            
+            const createNavHtml = (item, isDesktop) => `
+                <button onclick="navigateToTab('${item.id}', 'gurubk-view')" data-tab="${item.id}" class="w-full flex ${isDesktop ? 'items-center space-x-3 p-3 text-lg rounded-xl hover:bg-amber-50' : 'flex-col items-center justify-center p-2 text-xs transition duration-150'} text-gray-600">
+                    <i data-lucide="${item.icon}" class="${isDesktop ? 'w-6 h-6' : 'w-5 h-5'}"></i>
+                    <span class="${isDesktop ? 'font-medium' : 'mt-1'}">${item.label}</span>
+                </button>
+            `;
+
+            document.getElementById('mobile-nav').innerHTML = navItems.map(item => createNavHtml(item, false)).join('');
+            document.getElementById('desktop-nav').innerHTML = `
+                <div class="flex flex-col space-y-2 mt-4">
+                    ${navItems.map(item => createNavHtml(item, true)).join('')}
+                </div>
+                <div class="mt-auto pt-6 border-t border-gray-200">
+                    <button onclick="returnToRoleSelector()" class="w-full flex items-center space-x-3 p-3 text-lg rounded-xl text-red-600 hover:bg-red-50">
+                        <i data-lucide="log-out" class="w-6 h-6"></i>
+                        <span class="font-medium">Keluar</span>
+                    </button>
+                </div>
+            `;
+            navigateToTab('tab-gurubk-appointments', 'gurubk-view');
         }
 
         function loadAdminLayout() {
-            document.getElementById('mobile-nav').classList.add('hidden');
-            const sidebarHtml = `<h1 class="text-3xl font-extrabold text-gray-800 mb-8 flex items-center"><i data-lucide="hard-hat" class="w-8 h-8 mr-2"></i>BK Admin</h1><div class="flex flex-col space-y-2"><div class="w-full text-left p-4 rounded-xl bg-gray-100 text-gray-800 font-bold flex items-center space-x-3 border-r-4 border-gray-700"><i data-lucide="database" class="w-5 h-5"></i><span>Dashboard Utama</span></div></div><div class="mt-auto pt-6 border-t border-gray-100"><p class="text-xs text-gray-500">Profil Admin:</p><p id="admin-name-display" class="text-lg font-bold text-gray-800 break-words mb-2"></p><div id="auth-status" class="mt-2 text-xs font-medium text-gray-600"></div><button onclick="returnToRoleSelector()" class="w-full mt-4 text-sm text-red-600 hover:text-red-800 flex items-center justify-center font-semibold"><i data-lucide="log-out" class="w-4 h-4 mr-1"></i>Keluar Akun</button></div>`;
-            document.getElementById('desktop-nav').innerHTML = sidebarHtml;
+             const navItems = [
+                { id: 'admin-view', icon: 'layout-dashboard', label: 'Dashboard' } // Admin view is one page
+            ];
+            
+            const createNavHtml = (item, isDesktop) => `
+                <button onclick="navigateToTab('${item.id}', 'admin-view')" data-tab="${item.id}" class="w-full flex ${isDesktop ? 'items-center space-x-3 p-3 text-lg rounded-xl hover:bg-gray-100' : 'flex-col items-center justify-center p-2 text-xs transition duration-150'} text-gray-600">
+                    <i data-lucide="${item.icon}" class="${isDesktop ? 'w-6 h-6' : 'w-5 h-5'}"></i>
+                    <span class="${isDesktop ? 'font-medium' : 'mt-1'}">${item.label}</span>
+                </button>
+            `;
+
+            document.getElementById('mobile-nav').innerHTML = navItems.map(item => createNavHtml(item, false)).join('');
+            document.getElementById('desktop-nav').innerHTML = `
+                <div class="flex flex-col space-y-2 mt-4">
+                    ${navItems.map(item => createNavHtml(item, true)).join('')}
+                </div>
+                <div class="mt-auto pt-6 border-t border-gray-200">
+                    <button onclick="returnToRoleSelector()" class="w-full flex items-center space-x-3 p-3 text-lg rounded-xl text-red-600 hover:bg-red-50">
+                        <i data-lucide="log-out" class="w-6 h-6"></i>
+                        <span class="font-medium">Keluar</span>
+                    </button>
+                </div>
+            `;
+            // Admin only has one main view, so it's always visible after login
         }
-
-        // --- Data Form Handling ---
-        document.getElementById('student-info-form').addEventListener('submit', (e) => {
+        
+        // --- Data Form Handling (diubah untuk Supabase) ---
+        document.getElementById('student-info-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            studentProfile = { id: userId, fullName: document.getElementById('student-name').value.trim(), school: document.getElementById('student-school').value.trim(), major: document.getElementById('student-major').value.trim(), role: 'Siswa' };
-            saveDataToLocalStorage();
-            proceedToApp();
+            const newProfile = { id: userId, full_name: document.getElementById('student-name').value.trim(), school: document.getElementById('student-school').value.trim(), major: document.getElementById('student-major').value.trim(), role: 'Siswa' };
+            
+            const { data, error } = await supabase.from('profiles').insert(newProfile).select().single();
+            if (error) { console.error("Error creating student profile:", error); showCustomModal('Gagal Registrasi', 'Terjadi kesalahan saat menyimpan data profil.'); return; }
+            
+            userProfile = data;
+            await proceedToApp();
         });
 
-        document.getElementById('gurubk-info-form').addEventListener('submit', (e) => {
+        document.getElementById('gurubk-info-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            guruBkProfile = { fullName: document.getElementById('gurubk-name').value.trim(), phoneNumber: document.getElementById('gurubk-phone').value.trim(), role: 'Guru BK' };
-            saveDataToLocalStorage();
-            proceedToApp();
+            const newProfile = { id: userId, full_name: document.getElementById('gurubk-name').value.trim(), phone_number: document.getElementById('gurubk-phone').value.trim(), role: 'Guru BK' };
+            const { data, error } = await supabase.from('profiles').insert(newProfile).select().single();
+            if (error) { console.error("Error creating BK profile:", error); showCustomModal('Gagal Registrasi', 'Terjadi kesalahan saat menyimpan data profil.'); return; }
+            userProfile = data;
+            await proceedToApp();
         });
         
-        document.getElementById('admin-info-form').addEventListener('submit', (e) => {
+        document.getElementById('admin-info-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            adminProfile = { fullName: document.getElementById('admin-name').value.trim(), role: 'Admin' };
-            saveDataToLocalStorage();
-            proceedToApp();
+            const newProfile = { id: userId, full_name: document.getElementById('admin-name').value.trim(), role: 'Admin' };
+             const { data, error } = await supabase.from('profiles').insert(newProfile).select().single();
+            if (error) { console.error("Error creating Admin profile:", error); showCustomModal('Gagal Registrasi', 'Terjadi kesalahan saat menyimpan data profil.'); return; }
+            userProfile = data;
+            await proceedToApp();
         });
         
-        // --- Student Features ---
-        const renderMotivationalPosts = () => { document.getElementById('motivational-posts-list').innerHTML = localMotivationalPosts.map(post => `<div class="bg-white p-6 rounded-2xl shadow-xl border-l-8 border-sky-400 hover:shadow-2xl transition duration-200"><h4 class="text-xl font-bold text-gray-800 mb-2">${post.title}</h4><p class="text-gray-600 mb-4 line-clamp-3">${post.content}</p><p class="text-xs text-sky-500 font-medium flex items-center"><i data-lucide="user-check" class="w-4 h-4 mr-1"></i>Oleh: ${post.author}</p></div>`).join(''); lucide.createIcons(); };
+        // --- Student Features (diubah untuk Supabase) ---
+        async function loadInitialStudentData() {
+            await fetchAndRenderMotivationalPosts();
+            await fetchAndRenderAppointments();
+            // Tidak perlu render chat secara eksplisit, karena sudah ada listener realtime
+        }
         
-        document.getElementById('appointment-form').addEventListener('submit', (e) => {
+        async function fetchAndRenderMotivationalPosts() {
+            const { data, error } = await supabase.from('motivational_posts').select('*').order('created_at', { ascending: false });
+            if (error) { console.error('Error fetching posts:', error); return; }
+            document.getElementById('motivational-posts-list').innerHTML = data.map(post => `<div class="bg-white p-6 rounded-2xl shadow-xl border-l-8 border-sky-400 hover:shadow-2xl transition duration-200"><h4 class="text-xl font-bold text-gray-800 mb-2">${post.title}</h4><p class="text-gray-600 mb-4 line-clamp-3">${post.content}</p><p class="text-xs text-sky-500 font-medium flex items-center"><i data-lucide="user-check" class="w-4 h-4 mr-1"></i>Oleh: ${post.author}</p></div>`).join('');
+            lucide.createIcons();
+        }
+        
+        document.getElementById('appointment-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            localAppointments.unshift({ id: `app_${Date.now()}`, date: document.getElementById('appointment-date').value, time: document.getElementById('appointment-time').value, reason: document.getElementById('appointment-reason').value.trim(), studentId: userId, studentName: studentProfile.fullName, status: 'Pending', createdAt: new Date() });
-            renderAppointments();
-            saveDataToLocalStorage();
+            const newAppointment = { date: document.getElementById('appointment-date').value, time: document.getElementById('appointment-time').value, reason: document.getElementById('appointment-reason').value.trim(), student_id: userId, student_name: userProfile.full_name };
+            const { error } = await supabase.from('appointments').insert(newAppointment);
+            if (error) { console.error('Error creating appointment:', error); showCustomModal('Gagal', 'Gagal mengirim permintaan.'); return; }
             showCustomModal('Permintaan Terkirim!', 'Permintaan janji temu Anda berhasil dicatat. Guru BK akan segera mengonfirmasi jadwal Anda.');
             e.target.reset();
         });
 
-        const renderAppointments = () => {
+        async function fetchAndRenderAppointments() {
             const list = document.getElementById('appointments-list'), noApps = document.getElementById('no-appointments');
-            const studentAppointments = localAppointments.filter(app => app.studentId === userId);
-            noApps.classList.toggle('hidden', studentAppointments.length > 0);
-            list.innerHTML = studentAppointments.map(app => `<div class="bg-white p-4 rounded-xl shadow-md border-l-8 ${app.status === 'Confirmed' ? 'border-green-500' : app.status === 'Rejected' ? 'border-red-500' : 'border-yellow-500'}"><div class="flex justify-between items-start"><p class="font-bold text-gray-800 text-lg">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-600 mt-2">Alasan: ${app.reason}</p><p class="text-xs text-gray-400 mt-2">Diajukan: ${new Date(app.createdAt).toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`).join('');
+            const { data, error } = await supabase.from('appointments').select('*').eq('student_id', userId).order('date', { ascending: false });
+            if (error) { console.error('Error fetching appointments:', error); return; }
+            
+            noApps.classList.toggle('hidden', data.length > 0);
+            list.innerHTML = data.map(app => `<div class="bg-white p-4 rounded-xl shadow-md border-l-8 ${app.status === 'Confirmed' ? 'border-green-500' : app.status === 'Rejected' ? 'border-red-500' : 'border-yellow-500'}"><div class="flex justify-between items-start"><p class="font-bold text-gray-800 text-lg">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-600 mt-2">Alasan: ${app.reason}</p><p class="text-xs text-gray-400 mt-2">Diajukan: ${new Date(app.created_at).toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`).join('');
         };
         
-        document.getElementById('chat-form').addEventListener('submit', (e) => {
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const chatInput = document.getElementById('chat-input');
             if (!chatInput.value.trim()) return;
-            localChatMessages.push({ senderId: userId, senderName: studentProfile.fullName, message: chatInput.value.trim(), timestamp: new Date(), role: 'student' });
-            renderChatMessages();
+            const newMessage = { sender_id: userId, sender_name: userProfile.full_name, message: chatInput.value.trim(), role: 'student' };
+            // Tambahkan recipient_id ke pesan jika ingin diarahkan ke guru BK tertentu, untuk saat ini biarkan null
+            const { error } = await supabase.from('chat_messages').insert(newMessage);
+            if (error) { console.error('Error sending message:', error); return; }
             chatInput.value = '';
-            saveDataToLocalStorage();
         });
 
-        const renderChatMessages = () => {
+        async function renderChatMessages() {
+            // Dalam mode Siswa, hanya tampilkan pesan antara Siswa ini dan Guru BK (atau pesan yang tidak memiliki recipient_id)
+            const { data, error } = await supabase.from('chat_messages').select('*').or(`sender_id.eq.${userId},recipient_id.eq.${userId}`).order('created_at');
+            if (error) { console.error('Error fetching chat:', error); return; }
+
             const list = document.getElementById('chat-messages');
-            // Filter messages for the current student
-            const studentMessages = localChatMessages.filter(msg => msg.senderId === userId || msg.recipientId === userId);
-            
-            list.innerHTML = studentMessages.map(msg => {
-                // True if message is from student
-                const isUser = msg.role === 'student'; 
-                
-                return `<div class="max-w-[85%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm"><p>${!isUser ? `<span class="font-bold">Guru BK</span>: ` : ''}${msg.message}</p><p class="text-xs ${isUser ? 'text-sky-100' : 'text-amber-500'} text-right mt-1">${msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`;
+            list.innerHTML = data.map(msg => {
+                const isUser = msg.sender_id === userId; 
+                const timestamp = new Date(msg.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                return `<div class="max-w-[85%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm"><p>${!isUser ? `<span class="font-bold">Guru BK</span>: ` : ''}${msg.message}</p><p class="text-xs ${isUser ? 'text-sky-100' : 'text-amber-500'} text-right mt-1">${timestamp}</p></div>`;
             }).join('');
             list.scrollTop = list.scrollHeight;
         };
         
-        // --- Guru BK Features ---
-        function loadInitialGuruBkData() {
-            renderGuruBkAppointments();
-            renderGurubkChatThreads();
-            renderMateriManagementList();
+        // --- Guru BK Features (diubah untuk Supabase) ---
+        async function loadInitialGuruBkData() {
+            await fetchAndRenderGuruBkAppointments();
+            await fetchAndRenderGurubkChatThreads();
+            await fetchAndRenderMateriManagementList();
+            listenToAllChanges(); // Pindah listener ke sini dan Initial Load
         }
 
-        window.updateAppointmentStatus = (docId, newStatus) => {
-            const appointment = localAppointments.find(app => app.id === docId);
-            if (appointment) {
-                appointment.status = newStatus;
-                renderGuruBkAppointments();
-                renderAppointments(); // Update student view if needed
-                saveDataToLocalStorage();
-                showCustomModal('Aksi Berhasil', `Status Janji Temu diperbarui menjadi **${newStatus}**.`);
-            }
+        window.updateAppointmentStatus = async (docId, newStatus) => {
+            const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', docId);
+            if (error) { console.error('Error updating status:', error); return; }
+            showCustomModal('Aksi Berhasil', `Status Janji Temu diperbarui menjadi **${newStatus}**.`);
         };
 
-        const renderGuruBkAppointments = () => {
+        async function fetchAndRenderGuruBkAppointments() { 
             const list = document.getElementById('gurubk-appointments-list'), noApps = document.getElementById('no-gurubk-appointments');
-            const pending = localAppointments.filter(app => app.status !== 'Completed').sort((a,b) => b.createdAt - a.createdAt);
-            noApps.classList.toggle('hidden', pending.length > 0);
-            list.innerHTML = pending.map(app => `<div class="bg-amber-50 p-4 rounded-xl border border-amber-200 shadow-md"><div class="flex justify-between items-start mb-2"><p class="font-bold text-lg text-gray-800">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-700">Oleh: <span class="font-semibold">${app.studentName}</span></p><p class="text-sm text-gray-600 mt-1">Alasan: ${app.reason}</p><div class="mt-4 pt-3 border-t border-gray-200 flex flex-wrap gap-2"><button onclick="updateAppointmentStatus('${app.id}', 'Confirmed')" class="btn-primary flex-1 bg-green-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-green-600 shadow-sm">Konfirmasi</button><button onclick="updateAppointmentStatus('${app.id}', 'Rejected')" class="btn-primary flex-1 bg-red-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-red-600 shadow-sm">Tolak</button><button onclick="updateAppointmentStatus('${app.id}', 'Completed')" class="btn-secondary flex-1 bg-sky-500 text-white text-xs py-2 px-3 rounded-lg hover:bg-sky-600 shadow-sm">Selesaikan</button></div></div>`).join('');
-            lucide.createIcons();
-        };
-        
-        // --- Guru BK Chat Management ---
-        const getUniqueChatSenders = () => {
-            // Find all unique student IDs who have sent messages
-            const studentMessages = localChatMessages.filter(msg => msg.role === 'student');
-            const uniqueIds = [...new Set(studentMessages.map(msg => msg.senderId))];
+            // Ambil semua janji temu, dan pisahkan yang masih pending untuk diletakkan di atas
+            const { data, error } = await supabase.from('appointments').select('*').order('status', { ascending: true }).order('created_at', { ascending: false });
+            if (error) { console.error('Error fetching BK appointments:', error); return; }
             
-            // Map IDs to the latest message and student name
-            return uniqueIds.map(id => {
-                const threadMessages = localChatMessages.filter(msg => msg.senderId === id || msg.recipientId === id).sort((a, b) => b.timestamp - a.timestamp);
-                const latestMessage = threadMessages[0];
-                return {
-                    studentId: id,
-                    studentName: latestMessage.senderName || 'Siswa',
-                    latestMessageText: latestMessage.message,
-                    latestTimestamp: latestMessage.timestamp
-                };
-            }).sort((a,b) => b.latestTimestamp - a.latestTimestamp); // Sort by latest activity
-        };
-
-        const renderGurubkChatThreads = () => {
-            const list = document.getElementById('gurubk-chat-threads'), noThreads = document.getElementById('no-chat-threads');
-            const threads = getUniqueChatSenders();
-            noThreads.classList.toggle('hidden', threads.length > 0);
-
-            list.innerHTML = threads.map(thread => `
-                <div onclick="openChatReplyModal('${thread.studentId}', '${thread.studentName}')" class="p-4 bg-sky-50 hover:bg-sky-100 rounded-xl border border-sky-200 cursor-pointer transition shadow-sm">
-                    <div class="flex justify-between items-center">
-                        <p class="font-bold text-gray-800">${thread.studentName}</p>
-                        <p class="text-xs text-gray-500">${thread.latestTimestamp.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</p>
+            noApps.classList.toggle('hidden', data.length > 0);
+            
+            list.innerHTML = data.map(app => {
+                const isPending = app.status === 'Pending';
+                // Gunakan properti 'id' yang merupakan integer atau UUID untuk tombol update
+                return `<div class="bg-white p-4 rounded-xl shadow-md border-l-8 ${isPending ? 'border-yellow-500' : app.status === 'Confirmed' ? 'border-green-500' : app.status === 'Rejected' ? 'border-red-500' : 'border-sky-500'} ${isPending ? 'border-2 border-yellow-200' : ''}">
+                    <div class="flex justify-between items-start">
+                        <p class="font-bold text-gray-800 text-lg">${app.student_name} (${app.status})</p>
+                        <span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span>
                     </div>
-                    <p class="text-sm text-gray-600 mt-1 line-clamp-1">${thread.latestMessageText}</p>
-                </div>
-            `).join('');
-        };
-        window.openChatReplyModal = (studentId, studentName) => {
+                    <p class="text-sm text-gray-600 mt-2">Waktu: ${app.date} Pukul ${app.time}</p>
+                    <p class="text-sm text-gray-600">Alasan: ${app.reason}</p>
+                    ${isPending ? 
+                        `<div class="flex space-x-2 mt-3">
+                            <button onclick="updateAppointmentStatus('${app.id}', 'Confirmed')" class="btn-primary bg-green-500 text-white text-xs px-3 py-1 rounded-lg hover:bg-green-600 transition">Konfirmasi</button>
+                            <button onclick="updateAppointmentStatus('${app.id}', 'Rejected')" class="btn-secondary bg-red-500 text-white text-xs px-3 py-1 rounded-lg hover:bg-red-600 transition">Tolak</button>
+                        </div>` : ''}
+                </div>`;
+            }).join('');
+        }
+
+        async function openChatReplyModal(studentId, studentName) {
             currentChatStudentId = studentId;
             document.getElementById('chat-reply-student-name').textContent = studentName;
-            
-            // Render specific chat messages
-            const renderSpecificChat = () => {
-                 const chatList = document.getElementById('gurubk-specific-chat-messages');
-                 const threadMessages = localChatMessages.filter(msg => msg.senderId === studentId || msg.recipientId === studentId).sort((a, b) => a.timestamp - b.timestamp);
-                 
-                 chatList.innerHTML = threadMessages.map(msg => {
-                    const isGuruBk = msg.role === 'gurubk';
-                    return `<div class="max-w-[85%] ${isGuruBk ? 'chat-message-bk ml-auto' : 'chat-message-user mr-auto'} p-3 text-sm"><p class="font-semibold">${isGuruBk ? 'Anda (BK):' : msg.senderName}:</p><p>${msg.message}</p><p class="text-xs ${isGuruBk ? 'text-amber-500' : 'text-sky-100'} text-right mt-1">${msg.timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`;
-                }).join('');
-                chatList.scrollTop = chatList.scrollHeight;
-            };
-            
-            // Bind reply submission
-            document.getElementById('gurubk-chat-reply-form').onsubmit = (e) => {
-                e.preventDefault();
-                const replyInput = document.getElementById('gurubk-chat-reply-input');
-                if (!replyInput.value.trim()) return;
 
-                localChatMessages.push({
-                    senderId: 'BK_Teacher', 
-                    recipientId: currentChatStudentId,
-                    senderName: guruBkProfile.fullName,
-                    message: replyInput.value.trim(), 
-                    timestamp: new Date(), 
-                    role: 'gurubk' 
-                });
+            // 1. Ambil pesan chat spesifik
+            const { data, error } = await supabase.from('chat_messages').select('*').or(`sender_id.eq.${studentId},recipient_id.eq.${studentId}`).order('created_at');
+            if (error) { console.error('Error fetching specific chat:', error); return; }
 
-                renderSpecificChat();
-                // If the student is currently logged in, update their chat view too
-                if (userRole === 'student' && userId === currentChatStudentId) renderChatMessages();
+            // 2. Render pesan
+            const list = document.getElementById('gurubk-specific-chat-messages');
+            list.innerHTML = data.map(msg => {
+                const isUser = msg.sender_id === studentId;
+                const roleLabel = isUser ? msg.sender_name : 'Anda (Guru BK)'; 
+                const timestamp = new Date(msg.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
                 
-                replyInput.value = '';
-                saveDataToLocalStorage();
-                renderGurubkChatThreads(); // Update thread list
+                return `<div class="max-w-[85%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm">
+                    <p class="font-semibold mb-1">${roleLabel}</p>
+                    <p>${msg.message}</p>
+                    <p class="text-xs ${isUser ? 'text-sky-100' : 'text-amber-500'} text-right mt-1">${timestamp}</p>
+                </div>`;
+            }).join('');
+            list.scrollTop = list.scrollHeight;
+            lucide.createIcons();
+            document.getElementById('chat-reply-modal').classList.remove('hidden');
+        }
+        window.openChatReplyModal = openChatReplyModal;
+
+        document.getElementById('gurubk-chat-reply-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const replyInput = document.getElementById('gurubk-chat-reply-input');
+            if (!replyInput.value.trim() || !currentChatStudentId) return;
+
+            const newMessage = { 
+                sender_id: userId, 
+                sender_name: userProfile.full_name, 
+                message: replyInput.value.trim(), 
+                role: 'gurubk', 
+                recipient_id: currentChatStudentId // Kirim balasan ke Siswa yang sedang chatting
             };
             
-            renderSpecificChat();
-            document.getElementById('chat-reply-modal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('gurubk-chat-reply-input').focus(), 100);
-        };
-        
-        // --- Guru BK Materi Management (CRUD) ---
-        const renderMateriManagementList = () => {
-            const list = document.getElementById('gurubk-materi-list'), noMateri = document.getElementById('no-gurubk-materi');
-            noMateri.classList.toggle('hidden', localMotivationalPosts.length > 0);
+            const { error } = await supabase.from('chat_messages').insert(newMessage);
+            if (error) { console.error('Error sending reply:', error); return; }
+            
+            replyInput.value = '';
+            // Refresh modal untuk menampilkan pesan baru
+            openChatReplyModal(currentChatStudentId, document.getElementById('chat-reply-student-name').textContent);
+        });
 
-            list.innerHTML = localMotivationalPosts.map(post => `
-                <div class="bg-sky-50 p-4 rounded-xl border border-sky-200 shadow-md">
-                    <p class="font-bold text-lg text-gray-800">${post.title}</p>
-                    <p class="text-sm text-gray-600 mt-1 line-clamp-2">${post.content}</p>
-                    <p class="text-xs text-sky-500 mt-2">Oleh: ${post.author}</p>
-                    <div class="mt-3 border-t border-gray-200 pt-3 flex gap-2">
-                        <button onclick="editMateri('${post.id}')" class="btn-secondary bg-amber-500 text-gray-800 text-xs py-1.5 px-3 rounded-lg hover:bg-amber-600 flex items-center space-x-1 shadow-sm"><i data-lucide="edit-3" class="w-4 h-4"></i><span>Edit</span></button>
-                        <button onclick="deleteMateri('${post.id}')" class="btn-secondary bg-red-500 text-white text-xs py-1.5 px-3 rounded-lg hover:bg-red-600 flex items-center space-x-1 shadow-sm"><i data-lucide="trash-2" class="w-4 h-4"></i><span>Hapus</span></button>
+        async function fetchAndRenderGurubkChatThreads() {
+            // Dapatkan semua pesan untuk mengelompokkannya berdasarkan pengirim
+            const { data, error } = await supabase.from('chat_messages').select('*').order('created_at', { ascending: false });
+            if (error) { console.error('Error fetching chat threads:', error); return; }
+
+            const threadsMap = {};
+            data.forEach(msg => {
+                const threadId = msg.role === 'student' ? msg.sender_id : msg.recipient_id;
+                const studentName = msg.role === 'student' ? msg.sender_name : (msg.recipient_id === userId ? msg.sender_name : 'Siswa Lain');
+
+                if (!threadsMap[threadId]) {
+                    threadsMap[threadId] = {
+                        student_id: threadId,
+                        student_name: studentName,
+                        last_message: msg.message,
+                        last_message_time: new Date(msg.created_at),
+                        is_new: msg.role === 'student' // Asumsi pesan dari siswa adalah 'baru'
+                    };
+                }
+            });
+
+            const threads = Object.values(threadsMap).sort((a, b) => b.last_message_time - a.last_message_time);
+            const list = document.getElementById('gurubk-chat-threads');
+            const noThreads = document.getElementById('no-chat-threads');
+            
+            noThreads.classList.toggle('hidden', threads.length > 0);
+            
+            list.innerHTML = threads.map(thread => `
+                <div onclick="openChatReplyModal('${thread.student_id}', '${thread.student_name}')" class="bg-white p-4 rounded-xl shadow-md border-l-8 border-amber-400 hover:bg-amber-50 cursor-pointer transition">
+                    <div class="flex justify-between items-start">
+                        <p class="font-bold text-gray-800 text-lg">${thread.student_name}</p>
+                        <span class="text-xs text-gray-500">${thread.last_message_time.toLocaleDateString('id-ID')}</span>
                     </div>
+                    <p class="text-sm text-gray-600 mt-1 line-clamp-1">${thread.last_message}</p>
                 </div>
             `).join('');
-            lucide.createIcons();
-        };
-
-        document.getElementById('materi-form').addEventListener('submit', (e) => {
+        }
+        
+        document.getElementById('materi-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('materi-id').value;
             const title = document.getElementById('materi-title').value.trim();
             const content = document.getElementById('materi-content').value.trim();
-            const author = guruBkProfile.fullName || 'Guru BK';
-
-            if (id) {
-                // Edit existing post
-                const index = localMotivationalPosts.findIndex(p => p.id === id);
-                if (index > -1) {
-                    localMotivationalPosts[index] = { ...localMotivationalPosts[index], title, content, author };
-                    showCustomModal('Perubahan Disimpan', 'Materi berhasil diperbarui.');
-                }
-            } else {
-                // Add new post
-                localMotivationalPosts.unshift({ id: `post_${Date.now()}`, title, content, author });
-                showCustomModal('Materi Baru Ditambahkan', 'Materi baru berhasil ditambahkan dan siap dilihat siswa.');
-            }
             
-            saveDataToLocalStorage();
-            renderMateriManagementList();
-            renderMotivationalPosts(); // Update student view
-            // Reset form
+            const postData = { title, content, author: userProfile.full_name };
+            
+            let error;
+            if (id) {
+                // Edit
+                ({ error } = await supabase.from('motivational_posts').update(postData).eq('id', id));
+                showCustomModal('Berhasil', 'Materi berhasil diperbarui!');
+            } else {
+                // Tambah Baru
+                ({ error } = await supabase.from('motivational_posts').insert(postData));
+                showCustomModal('Berhasil', 'Materi baru berhasil ditambahkan!');
+            }
+
+            if (error) { console.error('Error saving materi:', error); showCustomModal('Gagal', 'Gagal menyimpan materi.'); return; }
             e.target.reset();
             document.getElementById('materi-id').value = '';
             document.getElementById('materi-submit-btn').textContent = 'Tambah Materi';
-            lucide.createIcons();
         });
+
+        window.editMateri = (id, title, content) => {
+            // Mengganti quotes agar aman dimasukkan ke string HTML
+            const safeTitle = title.replace(/'/g, "\\'").replace(/"/g, '\\"');
+            const safeContent = content.replace(/'/g, "\\'").replace(/"/g, '\\"');
+
+            document.getElementById('materi-id').value = id;
+            document.getElementById('materi-title').value = safeTitle;
+            document.getElementById('materi-content').value = safeContent;
+            document.getElementById('materi-submit-btn').textContent = 'Perbarui Materi';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
         
-        window.editMateri = (id) => {
-            const post = localMotivationalPosts.find(p => p.id === id);
-            if (post) {
-                document.getElementById('materi-id').value = post.id;
-                document.getElementById('materi-title').value = post.title;
-                document.getElementById('materi-content').value = post.content;
-                document.getElementById('materi-submit-btn').textContent = 'Simpan Perubahan';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        };
-
-        window.deleteMateri = (id) => {
-            if (confirm('Apakah Anda yakin ingin menghapus materi ini?')) {
-                localMotivationalPosts = localMotivationalPosts.filter(p => p.id !== id);
-                saveDataToLocalStorage();
-                renderMateriManagementList();
-                renderMotivationalPosts();
-                showCustomModal('Materi Dihapus', 'Materi berhasil dihapus.');
-            }
-        };
-
-
-        // --- Admin Features (Laporan Siswa/Sistem) ---
-        const renderAdminDashboard = () => {
-            // Stats calculation
-            const totalStudents = studentProfile ? 1 : 0; // Only tracking one local student
-            const totalAppointments = localAppointments.length;
-            const totalPending = localAppointments.filter(app => app.status === 'Pending').length;
-
-            document.getElementById('stat-students').textContent = totalStudents;
-            document.getElementById('stat-appointments').textContent = totalAppointments;
-            document.getElementById('stat-pending').textContent = totalPending;
+        window.deleteMateri = async (id) => {
+            // Gunakan modal kustom daripada confirm()
+            showCustomModal('Konfirmasi Hapus', `Anda yakin ingin menghapus materi ID: **${id}**?`, true); // Tanda true untuk konfirmasi
+            document.getElementById('modal-close-btn').textContent = 'Batalkan';
             
-            // Render Users List
-            const usersList = document.getElementById('admin-users-list');
-            let allUsers = [];
-            if (studentProfile) allUsers.push(studentProfile);
-            if (guruBkProfile) allUsers.push(guruBkProfile);
-            usersList.innerHTML = allUsers.length > 0 ? allUsers.map(user => `<div class="p-4 rounded-xl shadow-inner ${user.role === 'Siswa' ? 'bg-sky-50 border border-sky-200' : user.role === 'Guru BK' ? 'bg-amber-50 border border-amber-200' : 'bg-gray-100 border border-gray-300'} flex justify-between items-center"><div class="font-bold text-gray-800">${user.fullName}</div><div class="text-sm font-extrabold ${user.role === 'Siswa' ? 'text-sky-600' : user.role === 'Guru BK' ? 'text-amber-600' : 'text-gray-600'}">${user.role}</div></div>`).join('') : `<p class="text-gray-500 italic">Belum ada pengguna terdaftar.</p>`;
+            const deleteAction = async () => {
+                const { error } = await supabase.from('motivational_posts').delete().eq('id', id);
+                document.getElementById('modal-close-btn').onclick = () => document.getElementById('custom-modal').classList.add('hidden'); // Reset close action
+                if (error) { console.error('Error deleting materi:', error); showCustomModal('Gagal', 'Gagal menghapus materi.'); return; }
+                showCustomModal('Berhasil', 'Materi berhasil dihapus!');
+            };
+            
+            // Tambahkan tombol konfirmasi
+            const modalMessageEl = document.getElementById('modal-message');
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Ya, Hapus';
+            confirmBtn.className = 'w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 shadow-md mt-3';
+            confirmBtn.onclick = () => { deleteAction(); document.getElementById('custom-modal').classList.add('hidden'); };
+            
+            const closeBtn = document.getElementById('modal-close-btn');
+            closeBtn.parentNode.insertBefore(confirmBtn, closeBtn);
+            closeBtn.onclick = () => { confirmBtn.remove(); document.getElementById('custom-modal').classList.add('hidden'); };
+        };
 
-            // Render All Appointments
-            const appointmentsList = document.getElementById('admin-all-appointments-list');
-            appointmentsList.innerHTML = localAppointments.length > 0 ? localAppointments.map(app => `<div class="p-3 rounded-lg bg-gray-50 border border-gray-200 shadow-sm"><div class="flex justify-between items-center"><p class="font-semibold text-sm">${app.studentName} (${app.studentId})</p><span class="status-${app.status} px-2 py-0.5 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-xs text-gray-500 mt-1">${app.date} - ${app.time} | Alasan: ${app.reason.substring(0, 30)}...</p></div>`).join('') : `<p class="text-gray-500 italic">Belum ada janji temu dibuat.</p>`;
+        async function fetchAndRenderMateriManagementList() {
+            const list = document.getElementById('gurubk-materi-list'), noMateri = document.getElementById('no-gurubk-materi');
+            const { data, error } = await supabase.from('motivational_posts').select('*').order('created_at', { ascending: false });
+            if (error) { console.error('Error fetching management posts:', error); return; }
+            
+            noMateri.classList.toggle('hidden', data.length > 0);
+            
+            list.innerHTML = data.map(post => {
+                // Sanitasi konten untuk mencegah kerusakan string pada pemanggilan fungsi
+                const safeTitle = post.title.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                const safeContent = post.content.replace(/'/g, "\\'").replace(/"/g, '\\"');
+                
+                return `<div class="bg-white p-4 rounded-xl shadow-md border-l-8 border-sky-400">
+                    <h4 class="text-xl font-bold text-gray-800 mb-1">${post.title}</h4>
+                    <p class="text-gray-600 text-sm line-clamp-2">${post.content}</p>
+                    <div class="flex space-x-2 mt-3">
+                        <button onclick="editMateri(${post.id}, '${safeTitle}', '${safeContent}')" class="btn-primary bg-sky-500 text-white text-xs px-3 py-1 rounded-lg hover:bg-sky-600 transition flex items-center"><i data-lucide="pen-tool" class="w-4 h-4 mr-1"></i>Edit</button>
+                        <button onclick="deleteMateri(${post.id})" class="btn-secondary bg-red-500 text-white text-xs px-3 py-1 rounded-lg hover:bg-red-600 transition flex items-center"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Hapus</button>
+                    </div>
+                </div>`;
+            }).join('');
             lucide.createIcons();
-        };
-
-        window.viewSystemReport = () => {
-            let reportText = "=== LAPORAN DETAIL SISTEM BK SEKOLAH ===\n\n";
-
-            // 1. Data Siswa
-            reportText += `1. DATA PROFIL SISWA (${studentProfile ? 1 : 0} Siswa Terdaftar):\n`;
-            if (studentProfile) {
-                reportText += `   - Nama Lengkap: ${studentProfile.fullName}\n`;
-                reportText += `   - Sekolah: ${studentProfile.school}\n`;
-                reportText += `   - Jurusan/Kelas: ${studentProfile.major}\n`;
-                reportText += `   - ID (Lokal): ${studentProfile.id}\n`;
-            } else {
-                reportText += "   (Belum ada data siswa)\n";
-            }
-            reportText += "\n";
-
-            // 2. Data Guru BK
-            reportText += `2. DATA PROFIL GURU BK:\n`;
-            if (guruBkProfile) {
-                reportText += `   - Nama: ${guruBkProfile.fullName}\n`;
-                reportText += `   - Telepon: ${guruBkProfile.phoneNumber}\n`;
-            } else {
-                reportText += "   (Belum ada data Guru BK)\n";
-            }
-            reportText += "\n";
-
-            // 3. Data Janji Temu
-            reportText += `3. DATA JANJI TEMU (${localAppointments.length} Total):\n`;
-            if (localAppointments.length > 0) {
-                localAppointments.forEach((app, index) => {
-                    reportText += `   ${index + 1}. [${app.status}] ${app.studentName} (${app.date} ${app.time})\n`;
-                    reportText += `      Alasan: ${app.reason}\n`;
-                });
-            } else {
-                reportText += "   (Tidak ada janji temu)\n";
-            }
-            reportText += "\n";
-
-            // 4. Data Materi
-            reportText += `4. KONTEN MATERI MOTIVASI (${localMotivationalPosts.length} Total):\n`;
-            if (localMotivationalPosts.length > 0) {
-                localMotivationalPosts.forEach((post, index) => {
-                    reportText += `   ${index + 1}. Judul: ${post.title}\n`;
-                    reportText += `      Konten: ${post.content.substring(0, 50)}...\n`;
-                });
-            } else {
-                reportText += "   (Tidak ada materi)\n";
-            }
-            reportText += "\n";
-
-            // 5. Data Chat
-            reportText += `5. STATISTIK CHAT (${localChatMessages.length} Total Pesan):\n`;
-            const threads = getUniqueChatSenders();
-            reportText += `   - Jumlah Thread Aktif (Siswa): ${threads.length}\n`;
-            if (localChatMessages.length > 0) {
-                 const userMsg = localChatMessages.filter(msg => msg.role === 'student').length;
-                 const bkMsg = localChatMessages.filter(msg => msg.role === 'gurubk').length;
-                 reportText += `   - Pesan Siswa: ${userMsg}, Pesan BK: ${bkMsg}\n`;
-            } else {
-                reportText += "   (Belum ada aktivitas chat)\n";
-            }
-            
-            showCustomModal('Laporan Detail Sistem', `<pre class="text-xs text-left overflow-x-auto p-2 bg-gray-50 rounded-lg">${reportText}</pre>`);
-        };
-
-
-        // --- Initial Load ---
-        function loadInitialStudentData() {
-            renderMotivationalPosts();
-            renderAppointments();
-            renderChatMessages();
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadDataFromLocalStorage();
-            document.getElementById('role-selector').classList.remove('hidden');
-            lucide.createIcons();
+        // --- Admin Features ---
+        async function renderAdminDashboard() {
+            const { data: profiles, error: err1 } = await supabase.from('profiles').select('*');
+            const { data: appointments, error: err2 } = await supabase.from('appointments').select('*');
             
-             // Initialize default student ID if no profile exists
-            if (!studentProfile) {
-                userId = `local_student_${Date.now()}`;
+            if (err1 || err2) { console.error("Error fetching admin data:", err1 || err2); return; }
+
+            // Statistik
+            const students = profiles.filter(p => p.role === 'Siswa').length;
+            const totalAppointments = appointments.length;
+            const pendingAppointments = appointments.filter(a => a.status === 'Pending').length;
+            
+            document.getElementById('stat-students').textContent = students;
+            document.getElementById('stat-appointments').textContent = totalAppointments;
+            document.getElementById('stat-pending').textContent = pendingAppointments;
+
+            // Daftar Pengguna
+            const userListHtml = profiles.map(p => `
+                <div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center shadow-sm">
+                    <div>
+                        <p class="font-semibold text-gray-800">${p.full_name}</p>
+                        <p class="text-sm text-gray-500">${p.role}</p>
+                    </div>
+                    <span class="text-xs font-mono text-gray-400">${p.id.substring(0, 8)}...</span>
+                </div>
+            `).join('');
+            document.getElementById('admin-users-list').innerHTML = userListHtml;
+
+            // Daftar Semua Janji Temu
+            const allAppsListHtml = appointments.map(app => `
+                 <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 ${app.status === 'Confirmed' ? 'border-green-500' : app.status === 'Rejected' ? 'border-red-500' : 'border-yellow-500'}">
+                    <p class="font-bold text-gray-800 text-sm">${app.student_name} (<span class="status-${app.status} text-xs font-semibold rounded-full">${app.status}</span>)</p>
+                    <p class="text-xs text-gray-600">Pada: ${app.date} Pukul ${app.time}</p>
+                </div>
+            `).join('');
+            document.getElementById('admin-all-appointments-list').innerHTML = allAppsListHtml;
+
+            lucide.createIcons();
+        }
+        
+        window.viewSystemReport = () => {
+             showCustomModal('Laporan Sistem', 'Fitur laporan detail (export data) akan dikembangkan lebih lanjut! Saat ini Anda dapat melihat statistik di Dashboard.');
+        };
+
+
+        // --- Realtime Subscriptions ---
+        function listenToAllChanges() {
+             supabase.channel('public:appointments').on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, payload => {
+                if(userRole === 'student') fetchAndRenderAppointments();
+                if(userRole === 'gurubk') fetchAndRenderGuruBkAppointments();
+                if(userRole === 'admin') renderAdminDashboard();
+            }).subscribe();
+
+            supabase.channel('public:chat_messages').on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, payload => {
+                if(userRole === 'student') renderChatMessages();
+                if(userRole === 'gurubk') {
+                    if (currentChatStudentId) {
+                        // Refresh modal jika Guru BK sedang berada di chat ini
+                        const studentName = document.getElementById('chat-reply-student-name').textContent;
+                        openChatReplyModal(currentChatStudentId, studentName);
+                    }
+                    fetchAndRenderGurubkChatThreads();
+                }
+            }).subscribe();
+            
+            supabase.channel('public:motivational_posts').on('postgres_changes', { event: '*', schema: 'public', table: 'motivational_posts' }, payload => {
+                if(userRole === 'student') fetchAndRenderMotivationalPosts();
+                if(userRole === 'gurubk') fetchAndRenderMateriManagementList();
+            }).subscribe();
+            
+            // Listener untuk perubahan profil (misalnya, registrasi baru)
+            supabase.channel('public:profiles').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, payload => {
+                if(userRole === 'admin') renderAdminDashboard();
+            }).subscribe();
+        }
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Restore session if exists
+            const savedRole = localStorage.getItem('bkApp_userRole');
+            const savedId = localStorage.getItem('bkApp_userId');
+            
+            if (savedRole && savedId && supabase) {
+                userRole = savedRole;
+                userId = savedId;
+                const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+                userProfile = data;
+                if (userProfile) {
+                    await proceedToApp();
+                } else {
+                     document.getElementById('role-selector').classList.remove('hidden');
+                }
             } else {
-                userId = studentProfile.id; // Use saved ID
+                 document.getElementById('role-selector').classList.remove('hidden');
+            }
+            lucide.createIcons();
+
+            if(supabase) {
+                listenToAllChanges();
+            } else {
+                 showCustomModal('Peringatan Database', 'Supabase Client tidak diinisialisasi. Aplikasi akan berjalan, tetapi fitur login dan database tidak akan berfungsi.');
             }
         });
+        
     </script>
 </body>
 </html>

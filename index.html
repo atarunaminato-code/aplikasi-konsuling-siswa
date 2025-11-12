@@ -141,6 +141,46 @@
             
             <!-- Student View -->
             <div id="student-view" class="h-full w-full hidden">
+                
+                <!-- Tab: Tentang Aplikasi (BARU) -->
+                <div id="tab-about" class="tab-content hidden">
+                    <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-sky-400 pb-2">Tentang Aplikasi BK</h2>
+                    <p class="text-gray-600 mb-8 font-medium">Selamat datang di Pusat Bimbingan & Konseling Digital sekolah Anda. Temukan semua yang Anda butuhkan di sini.</p>
+                    
+                    <div class="space-y-8">
+                        <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-sky-500 mb-6">
+                            <h3 class="text-2xl font-bold text-gray-700 mb-3 flex items-center text-sky-700"><i data-lucide="info" class="w-6 h-6 mr-2"></i>Pengertian & Fungsi</h3>
+                            <p class="text-gray-600 leading-relaxed">
+                                Aplikasi Konseling BK Digital ini adalah sebuah platform yang dirancang untuk menjembatani komunikasi antara siswa dan Guru BK (Bimbingan Konseling) di lingkungan sekolah.
+                                <br><br>
+                                <strong>Fungsinya</strong> adalah untuk menyediakan akses yang mudah, cepat, dan rahasia bagi siswa untuk mendapatkan materi motivasi, menjadwalkan sesi konseling, serta mengirimkan masukan atau keluhan langsung kepada Guru BK.
+                            </p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-sky-500 mb-6">
+                            <h3 class="text-2xl font-bold text-gray-700 mb-3 flex items-center text-sky-700"><i data-lucide="layout-list" class="w-6 h-6 mr-2"></i>Fitur-Fitur Aplikasi</h3>
+                            <ul class="list-disc list-inside text-gray-600 space-y-2">
+                                <li><strong>Materi Inspirasi:</strong> Dapatkan artikel dan tips motivasi yang dipublikasikan langsung oleh Guru BK Anda.</li>
+                                <li><strong>Jadwal Konseling:</strong> Ajukan permintaan janji temu untuk sesi konseling tatap muka atau online dengan mudah.</li>
+                                <li><strong>Chat & Masukan:</strong> Kirim pesan, pertanyaan, masukan, atau keluhan secara pribadi dan rahasia kepada Guru BK.</li>
+                                <li><strong>Panel Guru BK:</strong> (Untuk Guru) Menerima janji, membalas chat/masukan, dan mengelola materi.</li>
+                                <li><strong>Panel Admin:</strong> (Untuk Admin) Memantau aktivitas dan mengelola data pengguna sistem.</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-sky-500">
+                            <h3 class="text-2xl font-bold text-gray-700 mb-3 flex items-center text-sky-700"><i data-lucide="mouse-pointer-square" class="w-6 h-6 mr-2"></i>Panduan Penggunaan (Siswa)</h3>
+                            <ol class="list-decimal list-inside text-gray-600 space-y-2">
+                                <li><strong>Pilih Peran:</strong> Masuk sebagai "Siswa" di halaman awal.</li>
+                                <li><strong>Navigasi:</strong> Gunakan menu di bagian bawah (ponsel) atau samping (desktop).</li>
+                                <li><strong>Membaca Materi:</strong> Buka tab "Materi" untuk melihat artikel terbaru.</li>
+                                <li><strong>Membuat Janji:</strong> Buka tab "Janji Temu", isi formulir, dan tunggu konfirmasi dari Guru BK.</li>
+                                <li><strong>Mengirim Masukan/Keluhan:</strong> Buka tab "Chat & Masukan", tulis pesan Anda di kotak bagian bawah, dan tekan kirim. Guru BK akan membalasnya di halaman yang sama.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Tab: Materi Motivasi -->
                 <div id="tab-materi" class="tab-content hidden">
                     <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-sky-400 pb-2">Materi Inspirasi</h2>
@@ -179,8 +219,8 @@
 
                 <!-- Tab: Chat Privasi -->
                 <div id="tab-chat" class="tab-content hidden h-full flex flex-col">
-                    <h2 class="text-4xl font-extrabold text-gray-800 mb-4 border-b-4 border-sky-400 pb-2">Ruang Chat Privasi</h2>
-                    <p class="text-gray-600 mb-6 font-medium">Saluran rahasia Anda untuk berkomunikasi langsung dengan Guru BK.</p>
+                    <h2 class="text-4xl font-extrabold text-gray-800 mb-4 border-b-4 border-sky-400 pb-2">Chat & Masukan</h2>
+                    <p class="text-gray-600 mb-6 font-medium">Saluran rahasia untuk masukan, keluhan, atau pertanyaan pribadi Anda.</p>
                     <div class="bg-amber-50 p-4 rounded-2xl shadow-md mb-6 border border-amber-200">
                          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                             <div class="flex items-center">
@@ -227,7 +267,7 @@
                     <div id="tab-gurubk-chat" class="gurubk-tab-content hidden h-full flex flex-col">
                         <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-amber-500 flex-1">
                             <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center text-amber-700">
-                                <i data-lucide="message-circle-more" class="w-6 h-6 mr-2"></i>Kotak Masuk Chat Siswa
+                                <i data-lucide="inbox" class="w-6 h-6 mr-2"></i>Kotak Masuk (Chat & Keluhan)
                             </h3>
                             <div id="gurubk-chat-threads" class="space-y-3 max-h-[80vh] overflow-y-auto custom-scrollbar">
                                 <p id="no-chat-threads" class="text-gray-500 italic">Belum ada pesan dari Siswa.</p>
@@ -286,7 +326,7 @@
                         <div class="p-4 bg-yellow-50 rounded-xl text-center shadow-inner"><p class="text-3xl font-extrabold text-yellow-800" id="stat-pending">0</p><p class="text-sm text-yellow-600 font-semibold">Janji Tertunda</p></div>
                     </div>
                     <button onclick="viewSystemReport()" class="btn-primary w-full bg-gray-700 text-white font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition flex items-center justify-center space-x-2 shadow-md">
-                        <i data-lucide="download" class="w-5 h-5"></i><span>Lihat Laporan Detail Siswa</span>
+                        <i data-lucide="download" class="w-5 h-5"></i><span>Download Laporan Detail Siswa (.csv)</span>
                     </button>
                  </div>
             </div>
@@ -353,6 +393,7 @@
         let userProfile = null;
         let userId = localStorage.getItem('bkApp_userId'); // Get user ID from local storage to persist session
         let currentChatStudentId = null; // For Guru BK chat reply
+        let adminDataCache = { profiles: [], appointments: [], chats: [] }; // Cache untuk data Admin
         
         // --- Utility Functions ---
         function showCustomModal(title, message) { 
@@ -471,9 +512,10 @@
         // --- Layout Loaders ---
         function loadStudentLayout() {
             const navItems = [
+                { id: 'tab-about', icon: 'book-text', label: 'Tentang' }, // BARU
                 { id: 'tab-materi', icon: 'book-open', label: 'Materi' },
                 { id: 'tab-appointment', icon: 'calendar-check', label: 'Janji Temu' },
-                { id: 'tab-chat', icon: 'message-square', label: 'Chat' },
+                { id: 'tab-chat', icon: 'message-square', label: 'Chat & Masukan' }, // Label diubah
             ];
             
             const createNavHtml = (item, isDesktop) => `
@@ -495,13 +537,13 @@
                     </button>
                 </div>
             `;
-            navigateToTab('tab-materi', 'student-view');
+            navigateToTab('tab-about', 'student-view'); // Default tab diubah
         }
 
         function loadGuruBkLayout() {
              const navItems = [
                 { id: 'tab-gurubk-appointments', icon: 'calendar-plus', label: 'Janji Temu' },
-                { id: 'tab-gurubk-chat', icon: 'message-circle', label: 'Kotak Masuk' },
+                { id: 'tab-gurubk-chat', icon: 'inbox', label: 'Masukan Siswa' }, // Label diubah
                 { id: 'tab-gurubk-materi', icon: 'list-checks', label: 'Kelola Materi' },
             ];
             
@@ -857,20 +899,26 @@
         async function renderAdminDashboard() {
             const { data: profiles, error: err1 } = await supabase.from('profiles').select('*');
             const { data: appointments, error: err2 } = await supabase.from('appointments').select('*');
+            const { data: chats, error: err3 } = await supabase.from('chat_messages').select('sender_id, role'); // Ambil data chat
             
-            if (err1 || err2) { console.error("Error fetching admin data:", err1 || err2); return; }
+            if (err1 || err2 || err3) { console.error("Error fetching admin data:", err1 || err2 || err3); return; }
 
-            // Statistik
-            const students = profiles.filter(p => p.role === 'Siswa').length;
-            const totalAppointments = appointments.length;
-            const pendingAppointments = appointments.filter(a => a.status === 'Pending').length;
+            // Simpan data ke cache
+            adminDataCache.profiles = profiles || [];
+            adminDataCache.appointments = appointments || [];
+            adminDataCache.chats = chats || [];
+
+            // Statistik (menggunakan data cache)
+            const students = adminDataCache.profiles.filter(p => p.role === 'Siswa').length;
+            const totalAppointments = adminDataCache.appointments.length;
+            const pendingAppointments = adminDataCache.appointments.filter(a => a.status === 'Pending').length;
             
             document.getElementById('stat-students').textContent = students;
             document.getElementById('stat-appointments').textContent = totalAppointments;
             document.getElementById('stat-pending').textContent = pendingAppointments;
 
-            // Daftar Pengguna
-            const userListHtml = profiles.map(p => `
+            // Daftar Pengguna (menggunakan data cache)
+            const userListHtml = adminDataCache.profiles.map(p => `
                 <div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center shadow-sm">
                     <div>
                         <p class="font-semibold text-gray-800">${p.full_name}</p>
@@ -881,8 +929,8 @@
             `).join('');
             document.getElementById('admin-users-list').innerHTML = userListHtml;
 
-            // Daftar Semua Janji Temu
-            const allAppsListHtml = appointments.map(app => `
+            // Daftar Semua Janji Temu (menggunakan data cache)
+            const allAppsListHtml = adminDataCache.appointments.map(app => `
                  <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 ${app.status === 'Confirmed' ? 'border-green-500' : app.status === 'Rejected' ? 'border-red-500' : 'border-yellow-500'}">
                     <p class="font-bold text-gray-800 text-sm">${app.student_name} (<span class="status-${app.status} text-xs font-semibold rounded-full">${app.status}</span>)</p>
                     <p class="text-xs text-gray-600">Pada: ${app.date} Pukul ${app.time}</p>
@@ -894,7 +942,50 @@
         }
         
         window.viewSystemReport = () => {
-             showCustomModal('Laporan Sistem', 'Fitur laporan detail (export data) akan dikembangkan lebih lanjut! Saat ini Anda dapat melihat statistik di Dashboard.');
+             // 1. Tampilkan modal loading
+             showCustomModal('Memproses Laporan', 'Sedang mengumpulkan data dan membuat file CSV... Harap tunggu.');
+             
+             try {
+                // 2. Akses data dari cache
+                const { profiles, appointments, chats } = adminDataCache;
+
+                const students = profiles.filter(p => p.role === 'Siswa');
+
+                // 3. Buat header CSV
+                let csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += "Nama Siswa,Sekolah,Jurusan/Kelas,Total Janji Temu,Total Pesan Terkirim\r\n";
+
+                // 4. Proses data dan tambahkan baris untuk setiap siswa
+                students.forEach(student => {
+                    const studentId = student.id;
+                    
+                    // Hitung janji temu
+                    const appointmentCount = appointments.filter(a => a.student_id === studentId).length;
+                    
+                    // Hitung pesan terkirim (hanya yang dikirim oleh siswa)
+                    const chatCount = chats.filter(c => c.sender_id === studentId && c.role === 'student').length;
+                    
+                    // Tambahkan baris ke CSV (handle kutip untuk data string)
+                    csvContent += `"${student.full_name}","${student.school || ''}","${student.major || ''}",${appointmentCount},${chatCount}\r\n`;
+                });
+
+                // 5. Buat link downloader dan picu unduhan
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", "laporan_detail_siswa.csv");
+                document.body.appendChild(link); // Diperlukan untuk Firefox
+
+                link.click(); // Klik link
+                document.body.removeChild(link); // Hapus link
+
+                // 6. Tampilkan modal sukses
+                showCustomModal('Laporan Selesai', 'File `laporan_detail_siswa.csv` telah berhasil diunduh.');
+
+             } catch (error) {
+                console.error("Error generating report:", error);
+                showCustomModal('Gagal Membuat Laporan', 'Terjadi kesalahan saat membuat file CSV. Silakan cek konsol.');
+             }
         };
 
 
@@ -916,6 +1007,7 @@
                     }
                     fetchAndRenderGurubkChatThreads();
                 }
+                if(userRole === 'admin') renderAdminDashboard(); // Perbarui cache jika ada chat baru
             }).subscribe();
             
             supabase.channel('public:motivational_posts').on('postgres_changes', { event: '*', schema: 'public', table: 'motivational_posts' }, payload => {

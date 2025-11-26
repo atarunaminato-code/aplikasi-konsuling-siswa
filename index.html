@@ -10,32 +10,29 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <!-- Load Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Load SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <style>
         /* Mengatur font default Inter */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f7ff; /* Latar belakang lembut seperti kertas */
+            background-color: #f0f7ff;
         }
         
-        /* Styling untuk scrollbar yang lebih halus */
         .custom-scrollbar::-webkit-scrollbar { width: 8px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #93c5fd; /* Sky-300 */ border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background-color: #e0f2fe; /* Sky-100 */ }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #93c5fd; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background-color: #e0f2fe; }
         
-        /* Efek klik pada tombol */
         .btn-primary:active, .btn-secondary:active { transform: scale(0.98); }
         
-        /* Warna status janji temu */
         .status-Pending { @apply bg-yellow-100 text-yellow-800 font-bold; }
         .status-Confirmed { @apply bg-green-100 text-green-800 font-bold; }
         .status-Rejected { @apply bg-red-100 text-red-800 font-bold; }
         .status-Completed { @apply bg-sky-100 text-sky-800 font-bold; }
 
-        /* Styling spesifik untuk chat */
         .chat-message-user { @apply bg-sky-500 text-white self-end rounded-bl-2xl rounded-t-2xl shadow-md; }
         .chat-message-bk { @apply bg-amber-100 text-gray-800 self-start rounded-br-2xl rounded-t-2xl shadow-md border border-amber-200; }
         
-        /* Style untuk Role Selector: Gradien papan tulis/mading */
         #role-selector { background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%); }
     </style>
 </head>
@@ -66,28 +63,25 @@
         </div>
     </div>
     
-    <!-- Data Forms for First Time Users -->
+    <!-- Forms (Siswa, Guru, Admin) -->
     <div id="student-data-form" class="absolute inset-0 z-40 flex items-center justify-center p-4 bg-sky-50 hidden">
         <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border-t-8 border-sky-500">
              <i data-lucide="notebook-pen" class="w-12 h-12 text-sky-600 mx-auto mb-4"></i>
             <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Data Siswa</h2>
-            <p class="text-gray-600 mb-8 text-center">Siapkan buku catatan Anda!</p>
             <form id="student-info-form">
                 <div class="mb-4">
-                    <label for="student-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                    <input type="text" id="student-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Contoh: Budi Sanjaya">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" required class="w-full p-3 border border-gray-300 rounded-lg bg-sky-50">
                 </div>
                 <div class="mb-4">
-                    <label for="student-school" class="block text-sm font-medium text-gray-700 mb-1">Asal Sekolah</label>
-                    <input type="text" id="student-school" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Contoh: SMAN 1 Dramaga">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Asal Sekolah</label>
+                    <input type="text" required class="w-full p-3 border border-gray-300 rounded-lg bg-sky-50">
                 </div>
                 <div class="mb-6">
-                    <label for="student-major" class="block text-sm font-medium text-gray-700 mb-1">Jurusan / Kelas</label>
-                    <input type="text" id="student-major" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Contoh: IPA 12 / RPL">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jurusan / Kelas</label>
+                    <input type="text" required class="w-full p-3 border border-gray-300 rounded-lg bg-sky-50">
                 </div>
-                <button type="submit" class="btn-primary w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-sky-700 transition duration-150 flex items-center justify-center space-x-2 shadow-lg">
-                    <i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>Mulai Belajar</span>
-                </button>
+                <button type="submit" class="btn-primary w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg">Mulai Belajar</button>
             </form>
         </div>
     </div>
@@ -96,19 +90,16 @@
         <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border-t-8 border-amber-500">
             <i data-lucide="user-cog" class="w-12 h-12 text-amber-600 mx-auto mb-4"></i>
             <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Data Guru BK</h2>
-            <p class="text-gray-600 mb-8 text-center">Siap membimbing siswa.</p>
             <form id="gurubk-info-form">
                 <div class="mb-4">
-                    <label for="gurubk-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-                    <input type="text" id="gurubk-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50" placeholder="Contoh: Ibu S.Pd">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" required class="w-full p-3 border border-gray-300 rounded-lg bg-amber-50">
                 </div>
                 <div class="mb-6">
-                    <label for="gurubk-phone" class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
-                    <input type="tel" id="gurubk-phone" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50" placeholder="Contoh: 081234567890">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nomor Telepon</label>
+                    <input type="tel" required class="w-full p-3 border border-gray-300 rounded-lg bg-amber-50">
                 </div>
-                <button type="submit" class="btn-primary w-full bg-amber-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-amber-700 transition duration-150 flex items-center justify-center space-x-2 shadow-lg">
-                    <i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>Masuk ke Panel Guru BK</span>
-                </button>
+                <button type="submit" class="btn-primary w-full bg-amber-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg">Masuk Panel</button>
             </form>
         </div>
     </div>
@@ -117,15 +108,12 @@
         <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border-t-8 border-gray-800">
             <i data-lucide="server-cog" class="w-12 h-12 text-gray-800 mx-auto mb-4"></i>
             <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">Data Admin</h2>
-            <p class="text-gray-600 mb-8 text-center">Pengelola seluruh sistem.</p>
             <form id="admin-info-form">
                 <div class="mb-6">
-                    <label for="admin-name" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Admin</label>
-                    <input type="text" id="admin-name" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-gray-800 focus:border-gray-800 bg-gray-50" placeholder="Contoh: Pengelola Sistem">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap Admin</label>
+                    <input type="text" required class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50">
                 </div>
-                <button type="submit" class="btn-primary w-full bg-gray-800 text-white font-bold py-3 px-4 rounded-xl hover:bg-gray-900 transition duration-150 flex items-center justify-center space-x-2 shadow-lg">
-                    <i data-lucide="arrow-right-circle" class="w-5 h-5"></i><span>Masuk ke Panel Admin</span>
-                </button>
+                <button type="submit" class="btn-primary w-full bg-gray-800 text-white font-bold py-3 px-4 rounded-xl shadow-lg">Masuk Panel Admin</button>
             </form>
         </div>
     </div>
@@ -137,58 +125,23 @@
         <aside id="desktop-nav" class="hidden md:flex flex-col w-72 bg-white border-r border-gray-200 p-6 shadow-xl"></aside>
 
         <!-- Content Area -->
-        <main class="flex-1 p-4 md:p-8 pb-20 md:pb-8 overflow-y-auto">
+        <main class="flex-1 p-4 md:p-8 pb-24 md:pb-8 overflow-y-auto">
             
             <!-- Student View -->
             <div id="student-view" class="h-full w-full hidden">
-                
-                <!-- Tab: Tentang Aplikasi (BARU) -->
                 <div id="tab-about" class="tab-content hidden">
                     <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-sky-400 pb-2">Tentang Aplikasi BK</h2>
-                    <p class="text-gray-600 mb-8 font-medium">Selamat datang di Pusat Bimbingan & Konseling Digital sekolah Anda. Temukan semua yang Anda butuhkan di sini.</p>
-                    
-                    <div class="space-y-8">
-                        <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-sky-500 mb-6">
-                            <h3 class="text-2xl font-bold text-gray-700 mb-3 flex items-center text-sky-700"><i data-lucide="info" class="w-6 h-6 mr-2"></i>Pengertian & Fungsi</h3>
-                            <p class="text-gray-600 leading-relaxed">
-                                Aplikasi Konseling BK Digital ini adalah sebuah platform yang dirancang untuk menjembatani komunikasi antara siswa dan Guru BK (Bimbingan Konseling) di lingkungan sekolah.
-                                <br><br>
-                                <strong>Fungsinya</strong> adalah untuk menyediakan akses yang mudah, cepat, dan rahasia bagi siswa untuk mendapatkan materi motivasi, menjadwalkan sesi konseling, serta mengirimkan masukan atau keluhan langsung kepada Guru BK.
-                            </p>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-sky-500 mb-6">
-                            <h3 class="text-2xl font-bold text-gray-700 mb-3 flex items-center text-sky-700"><i data-lucide="layout-list" class="w-6 h-6 mr-2"></i>Fitur-Fitur Aplikasi</h3>
-                            <ul class="list-disc list-inside text-gray-600 space-y-2">
-                                <li><strong>Materi Inspirasi:</strong> Dapatkan artikel dan tips motivasi yang dipublikasikan langsung oleh Guru BK Anda.</li>
-                                <li><strong>Jadwal Konseling:</strong> Ajukan permintaan janji temu untuk sesi konseling tatap muka atau online dengan mudah.</li>
-                                <li><strong>Chat & Masukan:</strong> Kirim pesan, pertanyaan, masukan, atau keluhan secara pribadi dan rahasia kepada Guru BK.</li>
-                                <li><strong>Panel Guru BK:</strong> (Untuk Guru) Menerima janji, membalas chat/masukan, dan mengelola materi.</li>
-                                <li><strong>Panel Admin:</strong> (Untuk Admin) Memantau aktivitas dan mengelola data pengguna sistem.</li>
-                            </ul>
-                        </div>
-
-                        <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-sky-500">
-                            <h3 class="text-2xl font-bold text-gray-700 mb-3 flex items-center text-sky-700"><i data-lucide="mouse-pointer-square" class="w-6 h-6 mr-2"></i>Panduan Penggunaan (Siswa)</h3>
-                            <ol class="list-decimal list-inside text-gray-600 space-y-2">
-                                <li><strong>Pilih Peran:</strong> Masuk sebagai "Siswa" di halaman awal.</li>
-                                <li><strong>Navigasi:</strong> Gunakan menu di bagian bawah (ponsel) atau samping (desktop).</li>
-                                <li><strong>Membaca Materi:</strong> Buka tab "Materi" untuk melihat artikel terbaru.</li>
-                                <li><strong>Membuat Janji:</strong> Buka tab "Janji Temu", isi formulir, dan tunggu konfirmasi dari Guru BK.</li>
-                                <li><strong>Mengirim Masukan/Keluhan:</strong> Buka tab "Chat & Masukan", tulis pesan Anda di kotak bagian bawah, dan tekan kirim. Guru BK akan membalasnya di halaman yang sama.</li>
-                            </ol>
-                        </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-sky-500 mb-6">
+                        <h3 class="text-2xl font-bold text-gray-700 mb-3 flex items-center text-sky-700"><i data-lucide="info" class="w-6 h-6 mr-2"></i>Pengertian & Fungsi</h3>
+                        <p class="text-gray-600 leading-relaxed">Aplikasi ini menjembatani komunikasi siswa dan Guru BK secara rahasia dan efisien.</p>
                     </div>
                 </div>
 
-                <!-- Tab: Materi Motivasi -->
                 <div id="tab-materi" class="tab-content hidden">
                     <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-sky-400 pb-2">Materi Inspirasi</h2>
-                    <p class="text-gray-600 mb-8 font-medium">Temukan semangat baru dan tips yang relevan untuk perkembangan akademik dan pribadi Anda.</p>
                     <div id="motivational-posts-list" class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"></div>
                 </div>
 
-                <!-- Tab: Janji Temu BK -->
                 <div id="tab-appointment" class="tab-content hidden">
                     <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-sky-400 pb-2">Jadwal Konseling</h2>
                     <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 border-t-8 border-amber-400">
@@ -196,51 +149,60 @@
                         <form id="appointment-form">
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="mb-4">
-                                    <label for="appointment-date" class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                                    <input type="date" id="appointment-date" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
+                                    <input type="date" id="appointment-date" required class="w-full p-3 border border-gray-300 rounded-lg bg-sky-50">
                                 </div>
                                 <div class="mb-4">
-                                    <label for="appointment-time" class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
-                                    <input type="time" id="appointment-time" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Waktu</label>
+                                    <input type="time" id="appointment-time" required class="w-full p-3 border border-gray-300 rounded-lg bg-sky-50">
                                 </div>
                             </div>
                             <div class="mb-6">
-                                <label for="appointment-reason" class="block text-sm font-medium text-gray-700 mb-1">Alasan Singkat Konseling</label>
-                                <textarea id="appointment-reason" rows="3" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Contoh: Kesulitan mengatur waktu belajar..."></textarea>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Alasan Singkat</label>
+                                <textarea id="appointment-reason" rows="3" required class="w-full p-3 border border-gray-300 rounded-lg bg-sky-50"></textarea>
                             </div>
-                            <button type="submit" class="btn-primary w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-sky-700 transition shadow-md">Kirim Permintaan</button>
+                            <button type="submit" class="btn-primary w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg">Kirim Permintaan</button>
                         </form>
                     </div>
-                    <h3 class="text-3xl font-bold text-gray-800 mb-4 mt-8">Riwayat Janji Temu Saya</h3>
-                    <div id="appointments-list" class="space-y-4">
-                        <p id="no-appointments" class="text-gray-500 italic hidden">Belum ada janji temu.</p>
-                    </div>
+                    <h3 class="text-3xl font-bold text-gray-800 mb-4 mt-8">Riwayat Janji Temu</h3>
+                    <div id="appointments-list" class="space-y-4"></div>
+                    <p id="no-appointments" class="text-gray-500 italic hidden">Belum ada janji temu.</p>
                 </div>
 
-                <!-- Tab: Chat Privasi -->
-                <div id="tab-chat" class="tab-content hidden h-full flex flex-col">
-                    <h2 class="text-4xl font-extrabold text-gray-800 mb-4 border-b-4 border-sky-400 pb-2">Chat & Masukan</h2>
-                    <p class="text-gray-600 mb-6 font-medium">Saluran rahasia untuk masukan, keluhan, atau pertanyaan pribadi Anda.</p>
-                    <div class="bg-amber-50 p-4 rounded-2xl shadow-md mb-6 border border-amber-200">
-                         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                            <div class="flex items-center">
-                                <i data-lucide="phone-call" class="w-6 h-6 text-amber-600 mr-3"></i>
-                                <div>
-                                    <p class="text-sm font-semibold text-amber-700">Hubungi Cepat Guru BK (Nomor Contoh):</p>
-                                    <a href="tel:+6285694009155" class="text-lg font-bold text-amber-800 hover:underline">085694009155</a>
-                                </div>
+                <div id="tab-complaints" class="tab-content hidden">
+                    <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-red-500 pb-2">Masukan & Keluhan</h2>
+                    <div class="bg-white p-6 rounded-2xl shadow-xl mb-8 border-l-8 border-red-500">
+                        <form id="complaint-form">
+                             <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+                                <select id="complaint-category" class="w-full p-3 border border-gray-300 rounded-lg bg-red-50">
+                                    <option value="Bullying">Perundungan (Bullying)</option>
+                                    <option value="Akademik">Masalah Akademik</option>
+                                    <option value="Sarana">Sarana & Prasarana</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
                             </div>
-                            <a href="https://wa.me/6285694009155" target="_blank" class="w-full sm:w-auto bg-amber-600 text-white font-bold py-2 px-4 rounded-xl hover:bg-amber-700 transition duration-150 flex items-center justify-center space-x-2 shadow-md">
-                                <i data-lucide="message-square" class="w-4 h-4"></i><span>Chat di WhatsApp</span>
-                            </a>
-                        </div>
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Isi Laporan</label>
+                                <textarea id="complaint-text" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg bg-red-50"></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary w-full bg-red-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg flex items-center justify-center">
+                                <i data-lucide="alert-triangle" class="w-5 h-5 mr-2"></i> Kirim Laporan
+                            </button>
+                        </form>
                     </div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Riwayat Laporan</h3>
+                    <div id="complaints-history-list" class="space-y-4"></div>
+                </div>
+
+                <div id="tab-chat" class="tab-content hidden h-full flex flex-col">
+                    <h2 class="text-4xl font-extrabold text-gray-800 mb-4 border-b-4 border-sky-400 pb-2">Chat Privasi</h2>
                     <div class="flex-1 bg-white p-4 rounded-2xl shadow-xl flex flex-col overflow-hidden h-[60vh] md:h-[70vh] border-2 border-sky-100">
                         <div id="chat-messages" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar p-2"></div>
                         <form id="chat-form" class="mt-4 flex space-x-3">
-                            <input type="text" id="chat-input" required placeholder="Tulis masukan, pertanyaan, atau keluhan Anda..." class="flex-1 p-3 border-2 border-sky-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50">
-                            <button type="submit" class="btn-primary bg-sky-600 text-white p-3 rounded-xl hover:bg-sky-700 transition flex items-center justify-center shadow-md">
-                                <i data-lucide="send" class="w-5 h-5"></i><span class="hidden sm:inline ml-2">Kirim</span>
+                            <input type="text" id="chat-input" required placeholder="Tulis pesan pribadi..." class="flex-1 p-3 border-2 border-sky-300 rounded-lg bg-sky-50">
+                            <button type="submit" class="btn-primary bg-sky-600 text-white p-3 rounded-xl shadow-lg">
+                                <i data-lucide="send" class="w-5 h-5"></i>
                             </button>
                         </form>
                     </div>
@@ -251,114 +213,117 @@
             <div id="gurubk-view" class="h-full w-full hidden">
                 <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-amber-400 pb-2">Panel Guru BK</h2>
                 <div id="gurubk-content" class="h-full">
-                    <!-- Tab: Antrean Janji Temu -->
+                    
                     <div id="tab-gurubk-appointments" class="gurubk-tab-content h-full hidden">
                          <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-amber-500">
                             <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center text-amber-700">
-                                <i data-lucide="inbox" class="w-6 h-6 mr-2"></i>Antrean Janji Temu Masuk
+                                <i data-lucide="inbox" class="w-6 h-6 mr-2"></i>Antrean Janji Temu
                             </h3>
-                            <div id="gurubk-appointments-list" class="space-y-4">
-                                <p id="no-gurubk-appointments" class="text-gray-500 italic">Tidak ada janji temu baru.</p>
-                            </div>
+                            <div id="gurubk-appointments-list" class="space-y-4"></div>
+                            <p id="no-gurubk-appointments" class="text-gray-500 italic hidden">Tidak ada janji temu baru.</p>
                         </div>
                     </div>
 
-                    <!-- Tab: Chat Siswa -->
                     <div id="tab-gurubk-chat" class="gurubk-tab-content hidden h-full flex flex-col">
                         <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-amber-500 flex-1">
                             <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center text-amber-700">
-                                <i data-lucide="inbox" class="w-6 h-6 mr-2"></i>Kotak Masuk (Chat & Keluhan)
+                                <i data-lucide="message-circle" class="w-6 h-6 mr-2"></i>Chat Privasi Siswa
                             </h3>
-                            <div id="gurubk-chat-threads" class="space-y-3 max-h-[80vh] overflow-y-auto custom-scrollbar">
-                                <p id="no-chat-threads" class="text-gray-500 italic">Belum ada pesan dari Siswa.</p>
-                            </div>
+                            <div id="gurubk-chat-threads" class="space-y-3 max-h-[80vh] overflow-y-auto custom-scrollbar"></div>
+                            <p id="no-chat-threads" class="text-gray-500 italic hidden">Belum ada pesan.</p>
                         </div>
                     </div>
 
-                    <!-- Tab: Kelola Materi -->
+                    <div id="tab-gurubk-complaints" class="gurubk-tab-content hidden h-full flex flex-col">
+                        <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-red-500 flex-1">
+                            <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center text-red-700">
+                                <i data-lucide="alert-octagon" class="w-6 h-6 mr-2"></i>Kotak Masukan & Keluhan
+                            </h3>
+                            <div id="gurubk-complaints-list" class="space-y-3 max-h-[80vh] overflow-y-auto custom-scrollbar"></div>
+                            <p id="no-complaints-threads" class="text-gray-500 italic hidden">Belum ada laporan.</p>
+                        </div>
+                    </div>
+
+                    <!-- FIX: Bagian Materi yang Diperbaiki -->
                     <div id="tab-gurubk-materi" class="gurubk-tab-content hidden">
                         <div class="bg-white p-6 rounded-2xl shadow-xl mb-6 border-t-8 border-sky-500">
                             <h3 class="text-2xl font-bold text-gray-700 mb-4 flex items-center text-sky-700"><i data-lucide="book-open-text" class="w-6 h-6 mr-2"></i>Kelola Materi Motivasi</h3>
                             <form id="materi-form">
                                 <input type="hidden" id="materi-id">
                                 <div class="mb-4">
-                                    <label for="materi-title" class="block text-sm font-medium text-gray-700 mb-1">Judul Materi</label>
-                                    <input type="text" id="materi-title" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Contoh: 3 Kunci Fokus Belajar">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Judul Materi</label>
+                                    <input type="text" id="materi-title" required class="w-full p-3 border border-gray-300 rounded-lg bg-sky-50">
                                 </div>
                                 <div class="mb-6">
-                                    <label for="materi-content" class="block text-sm font-medium text-gray-700 mb-1">Isi Materi</label>
-                                    <textarea id="materi-content" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-sky-500 focus:border-sky-500 bg-sky-50" placeholder="Tuliskan konten motivasi di sini..."></textarea>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Isi Materi</label>
+                                    <textarea id="materi-content" rows="4" required class="w-full p-3 border border-gray-300 rounded-lg bg-sky-50"></textarea>
                                 </div>
-                                <button type="submit" id="materi-submit-btn" class="btn-primary w-full bg-sky-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-sky-700 transition shadow-md">Tambah Materi</button>
+                                <div class="flex space-x-2">
+                                    <button type="submit" id="materi-submit-btn" class="flex-1 btn-primary bg-sky-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg">Tambah Materi</button>
+                                    <button type="button" onclick="resetMateriForm()" id="materi-cancel-btn" class="hidden flex-none bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-xl shadow-lg">Batal</button>
+                                </div>
                             </form>
                         </div>
 
                         <h3 class="text-3xl font-bold text-gray-800 mb-4 mt-8">Daftar Materi Aktif</h3>
-                        <div id="gurubk-materi-list" class="space-y-4">
-                            <p id="no-gurubk-materi" class="text-gray-500 italic">Belum ada materi yang dibuat.</p>
-                        </div>
+                        <div id="gurubk-materi-list" class="space-y-4"></div>
+                        <p id="no-gurubk-materi" class="text-gray-500 italic hidden">Belum ada materi.</p>
                     </div>
                 </div>
             </div>
 
             <!-- Admin View -->
             <div id="admin-view" class="h-full w-full hidden">
-                 <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-gray-700 pb-2">Dashboard Admin Pengelola</h2>
-                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <!-- Kolom Pengguna Terdaftar -->
-                    <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-gray-700">
-                        <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="users" class="w-6 h-6 mr-2 text-gray-700"></i>Pengguna Terdaftar</h3>
-                        <div id="admin-users-list" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar"></div>
-                    </div>
-                    <!-- Kolom Semua Janji Temu -->
-                    <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-gray-700">
-                         <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="clipboard-list" class="w-6 h-6 mr-2 text-gray-700"></i>Seluruh Janji Temu</h3>
-                         <div id="admin-all-appointments-list" class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar"></div>
-                    </div>
-                 </div>
+                 <h2 class="text-4xl font-extrabold text-gray-800 mb-6 border-b-4 border-gray-700 pb-2">Dashboard Admin</h2>
                  
-                 <!-- Laporan Siswa / Sistem -->
-                 <div class="mt-8 bg-white p-6 rounded-2xl shadow-2xl border-t-8 border-gray-800">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="book-text" class="w-6 h-6 mr-2 text-gray-800"></i>Laporan & Statistik Sistem</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                 <!-- Laporan & Ekspor -->
+                 <div class="mb-8 bg-white p-6 rounded-2xl shadow-2xl border-t-8 border-gray-800">
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center"><i data-lucide="bar-chart-3" class="w-6 h-6 mr-2 text-gray-800"></i>Laporan & Statistik</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
                         <div class="p-4 bg-sky-50 rounded-xl text-center shadow-inner"><p class="text-3xl font-extrabold text-sky-800" id="stat-students">0</p><p class="text-sm text-sky-600 font-semibold">Total Siswa</p></div>
                         <div class="p-4 bg-amber-50 rounded-xl text-center shadow-inner"><p class="text-3xl font-extrabold text-amber-800" id="stat-appointments">0</p><p class="text-sm text-amber-600 font-semibold">Total Janji</p></div>
-                        <div class="p-4 bg-yellow-50 rounded-xl text-center shadow-inner"><p class="text-3xl font-extrabold text-yellow-800" id="stat-pending">0</p><p class="text-sm text-yellow-600 font-semibold">Janji Tertunda</p></div>
+                        <div class="p-4 bg-red-50 rounded-xl text-center shadow-inner"><p class="text-3xl font-extrabold text-red-800" id="stat-complaints">0</p><p class="text-sm text-red-600 font-semibold">Keluhan</p></div>
+                        <div class="p-4 bg-green-50 rounded-xl text-center shadow-inner"><p class="text-3xl font-extrabold text-green-800" id="stat-activity">0</p><p class="text-sm text-green-600 font-semibold">Log Aktivitas</p></div>
                     </div>
-                    <button onclick="viewSystemReport()" class="btn-primary w-full bg-gray-700 text-white font-bold py-3 px-4 rounded-xl hover:bg-gray-800 transition flex items-center justify-center space-x-2 shadow-md">
-                        <i data-lucide="download" class="w-5 h-5"></i><span>Download Laporan Detail Siswa (.csv)</span>
+                    <!-- FIX: Tombol Download dengan fungsi baru -->
+                    <button onclick="downloadAdminReport()" class="btn-primary w-full bg-green-700 text-white font-bold py-3 px-4 rounded-xl hover:bg-green-800 transition flex items-center justify-center space-x-2 shadow-md">
+                        <i data-lucide="file-spreadsheet" class="w-5 h-5"></i><span>Download Data Lengkap (Excel)</span>
                     </button>
                  </div>
-            </div>
 
-            <!-- Custom Modal -->
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-gray-700">
+                        <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="users-cog" class="w-6 h-6 mr-2 text-gray-700"></i>Kelola Akun</h3>
+                        <div id="admin-users-list" class="space-y-3 max-h-96 overflow-y-auto custom-scrollbar"></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-xl border-t-8 border-gray-700">
+                         <h3 class="text-2xl font-semibold text-gray-700 mb-4 flex items-center"><i data-lucide="history" class="w-6 h-6 mr-2 text-gray-700"></i>Log Aktivitas</h3>
+                         <div id="admin-activity-list" class="space-y-2 max-h-96 overflow-y-auto custom-scrollbar text-sm"></div>
+                    </div>
+                 </div>
+            </div>
+            <!-- Modal Kustom (Diperbarui untuk Konfirmasi) -->
             <div id="custom-modal" class="fixed inset-0 bg-gray-900 bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full border-t-8 border-sky-500">
-                    <h3 id="modal-title" class="text-2xl font-bold mb-3 text-sky-700 flex items-center"><i data-lucide="bell" class="w-6 h-6 mr-2"></i>Notifikasi</h3>
+                    <h3 id="modal-title" class="text-2xl font-bold mb-3 text-sky-700 flex items-center"></h3>
                     <div id="modal-message" class="text-gray-600 mb-5 overflow-y-auto max-h-64 whitespace-pre-wrap text-sm border-b pb-3"></div>
-                    <button id="modal-close-btn" class="w-full bg-sky-600 text-white font-bold py-3 rounded-xl hover:bg-sky-700 shadow-md">Tutup</button>
+                    <!-- Container tombol yang akan diisi oleh JS -->
+                    <div id="modal-button-container" class="flex justify-end space-x-2">
+                        <button id="modal-close-btn" class="w-full bg-sky-600 text-white font-bold py-3 rounded-xl hover:bg-sky-700 shadow-md">Tutup</button>
+                    </div>
                 </div>
             </div>
 
-             <!-- Chat View/Reply Modal for Guru BK -->
             <div id="chat-reply-modal" class="fixed inset-0 bg-gray-900 bg-opacity-70 z-50 hidden flex items-center justify-center p-4">
                 <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-lg w-full h-[90vh] flex flex-col border-t-8 border-amber-500">
                     <div class="flex justify-between items-center mb-4 border-b pb-3">
-                        <h3 class="text-2xl font-bold text-amber-700">Chat dengan <span id="chat-reply-student-name"></span></h3>
-                        <button onclick="closeChatReplyModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition">
-                            <i data-lucide="x" class="w-6 h-6"></i>
-                        </button>
+                        <h3 class="text-2xl font-bold text-amber-700">Chat <span id="chat-reply-student-name"></span></h3>
+                        <button onclick="closeChatReplyModal()" class="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-100 transition"><i data-lucide="x" class="w-6 h-6"></i></button>
                     </div>
-                    
-                    <div id="gurubk-specific-chat-messages" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar p-2 mb-4 bg-sky-50 rounded-xl border border-sky-200">
-                        <!-- Messages render here -->
-                    </div>
-                    
+                    <div id="gurubk-specific-chat-messages" class="flex-1 overflow-y-auto space-y-4 custom-scrollbar p-2 mb-4 bg-sky-50 rounded-xl border border-sky-200"></div>
                     <form id="gurubk-chat-reply-form" class="flex space-x-3">
-                        <input type="text" id="gurubk-chat-reply-input" required placeholder="Balas pesan siswa (seperti menggunakan pena)..." class="flex-1 p-3 border-2 border-amber-300 rounded-lg focus:ring-amber-500 focus:border-amber-500 bg-amber-50">
-                        <button type="submit" class="btn-primary bg-amber-600 text-white p-3 rounded-xl hover:bg-amber-700 transition flex items-center justify-center shadow-md">
-                            <i data-lucide="send" class="w-5 h-5"></i><span class="hidden sm:inline ml-2">Balas</span>
-                        </button>
+                        <input type="text" id="gurubk-chat-reply-input" required placeholder="Balas pesan..." class="flex-1 p-3 border-2 border-amber-300 rounded-lg bg-amber-50">
+                        <button type="submit" class="btn-primary bg-amber-600 text-white p-3 rounded-xl shadow-lg"><i data-lucide="send" class="w-5 h-5"></i></button>
                     </form>
                 </div>
             </div>
@@ -366,66 +331,91 @@
         </main>
     </div>
 
-    <!-- App Logic with Supabase -->
     <script>
-        // --- Koneksi ke Supabase ---
-        // PENTING: Ganti nilai di bawah ini dengan URL dan Kunci Anon dari dashboard Supabase Anda.
         const SUPABASE_URL = 'https://bpquystzpzmwezpephaf.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwcXV5c3R6cHptd2V6cGVwaGFmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjM4MjQsImV4cCI6MjA3NjU5OTgyNH0.CGLIirF-HypP4yjsJqy2tagPhm4AQaQpxuvZ7JbfovE';
 
-        // Inisialisasi Supabase Client
-        let supabase; // Variabel untuk menyimpan instance klien Supabase
+        let supabase; 
         try {
-            // Kita akan mencoba menginisialisasi klien Supabase terlepas dari nilai default,
-            // selama URL dan Kunci ada, untuk memungkinkan pengguna masuk dalam mode simulasi.
-            if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-                // MENGAKSES FUNGSI createClient DARI OBJEK GLOBAL
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            } else {
-                 console.warn("Supabase credentials not fully provided. App will run in a limited state.");
-            }
-        } catch(e) {
-            console.error("Error initializing Supabase client:", e);
-        }
+            if (SUPABASE_URL && SUPABASE_ANON_KEY) supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch(e) { console.error("Error initializing Supabase:", e); }
 
-        // --- Global State ---
         let userRole = null; 
         let userProfile = null;
-        let userId = localStorage.getItem('bkApp_userId'); // Get user ID from local storage to persist session
-        let currentChatStudentId = null; // For Guru BK chat reply
-        let adminDataCache = { profiles: [], appointments: [], chats: [] }; // Cache untuk data Admin
+        let userId = localStorage.getItem('bkApp_userId'); 
+        let currentChatStudentId = null; 
+        let adminDataCache = { profiles: [], appointments: [], chats: [] }; 
+        // Cache untuk menyimpan data materi agar aman saat diedit
+        let materiDataCache = [];
+        const COMPLAINT_PREFIX = "::KELUHAN::";
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
         
-        // --- Utility Functions ---
-        function showCustomModal(title, message) { 
-            document.getElementById('modal-title').innerHTML = `<i data-lucide="${title.toLowerCase().includes('gagal') ? 'alert-triangle' : 'check-circle'}" class="w-6 h-6 mr-2"></i>${title}`;
-            document.getElementById('modal-message').innerHTML = message;
-            document.getElementById('custom-modal').classList.remove('hidden');
+        // FUNGSI escapeForJs DIHAPUS, DIGANTI DENGAN JSON.stringify UNTUK KEAMANAN
+        
+        // FUNGSI MODAL KUSTOM YANG DIPERBARUI UNTUK MENDUKUNG KONFIRMASI
+        function showCustomModal(title, message, isConfirm = false, onConfirm = null) { 
+            const modal = document.getElementById('custom-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const btnContainer = document.getElementById('modal-button-container');
+            
+            // Bersihkan semua tombol yang ada
+            btnContainer.innerHTML = ''; 
+
+            modalTitle.innerHTML = `<i data-lucide="${title.toLowerCase().includes('gagal') ? 'alert-triangle' : 'check-circle'}" class="w-6 h-6 mr-2"></i>${title}`;
+            modalMessage.innerHTML = message;
+            
+            if (isConfirm && onConfirm) {
+                // Tombol Batal
+                const cancelBtn = document.createElement('button');
+                cancelBtn.className = 'w-1/2 bg-gray-300 text-gray-800 font-bold py-3 rounded-xl hover:bg-gray-400 shadow-md';
+                cancelBtn.textContent = 'Batal';
+                cancelBtn.onclick = () => modal.classList.add('hidden');
+                btnContainer.appendChild(cancelBtn);
+
+                // Tombol Konfirmasi
+                const confirmBtn = document.createElement('button');
+                confirmBtn.className = 'w-1/2 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 shadow-md';
+                confirmBtn.textContent = 'Ya, Konfirmasi';
+                confirmBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    if (onConfirm) onConfirm(); // Jalankan callback konfirmasi
+                };
+                btnContainer.appendChild(confirmBtn);
+
+            } else {
+                // Tombol Tutup Default
+                const closeBtn = document.createElement('button');
+                closeBtn.id = 'modal-close-btn'; // Pertahankan ID untuk referensi
+                closeBtn.className = 'w-full bg-sky-600 text-white font-bold py-3 rounded-xl hover:bg-sky-700 shadow-md';
+                closeBtn.textContent = 'Tutup';
+                closeBtn.onclick = () => modal.classList.add('hidden');
+                btnContainer.appendChild(closeBtn);
+            }
+
+            modal.classList.remove('hidden');
             lucide.createIcons();
         }
-        document.getElementById('modal-close-btn').onclick = () => document.getElementById('custom-modal').classList.add('hidden');
+
+        // Fungsi pembungkus untuk konfirmasi (menggantikan window.confirm)
+        function showConfirmationModal(title, message, onConfirm) {
+            showCustomModal(title, message, true, onConfirm);
+        }
+        window.showConfirmationModal = showConfirmationModal;
+        
         function closeChatReplyModal() { document.getElementById('chat-reply-modal').classList.add('hidden'); currentChatStudentId = null; }
         window.closeChatReplyModal = closeChatReplyModal;
         
         function returnToRoleSelector() { 
-            localStorage.removeItem('bkApp_userId');
-            localStorage.removeItem('bkApp_userRole');
-            localStorage.removeItem('bkApp_userId_student');
-            localStorage.removeItem('bkApp_userId_gurubk');
-            localStorage.removeItem('bkApp_userId_admin');
+            localStorage.clear();
             window.location.reload(); 
         }
         window.returnToRoleSelector = returnToRoleSelector;
 
-        // --- Display Info Updaters ---
-        const updateDisplayInfo = () => {
-            if (!userProfile) return;
-            // Ini akan membutuhkan elemen display yang belum ada di HTML, biarkan sebagai placeholder.
-            // if (userRole === 'student') document.getElementById('user-name-display').textContent = userProfile.full_name;
-            // if (userRole === 'gurubk') document.getElementById('gurubk-name-display').textContent = userProfile.full_name;
-            // if (userRole === 'admin') document.getElementById('admin-name-display').textContent = userProfile.full_name;
-        };
-
-        // --- Role & View Management ---
         async function proceedToApp() {
             ['role-selector', 'student-data-form', 'gurubk-data-form', 'admin-data-form'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById('main-app-container').classList.remove('hidden');
@@ -444,43 +434,23 @@
                 loadAdminLayout();
                 await renderAdminDashboard();
             }
-            
-            updateDisplayInfo();
-            // document.getElementById('auth-status').textContent = `Status: Terhubung (${userRole.toUpperCase()})`; // Elemen ini juga belum ada
             lucide.createIcons();
         }
 
         async function setRoleAndLogin(role) {
             userRole = role;
-            
-            // FIX: Mengganti simulasi ID berbasis timestamp dengan UUID yang valid untuk Supabase
             let roleSpecificId = localStorage.getItem(`bkApp_userId_${role}`);
-            if (!roleSpecificId) {
-                // Generate a proper UUID structure for Supabase ID compatibility
-                roleSpecificId = crypto.randomUUID(); 
-            }
+            if (!roleSpecificId) { roleSpecificId = crypto.randomUUID(); }
             
             userId = roleSpecificId;
             localStorage.setItem(`bkApp_userId_${role}`, userId);
             localStorage.setItem('bkApp_userId', userId);
             localStorage.setItem('bkApp_userRole', role);
 
-            // Cek di sini, Supabase client harus sudah terinisialisasi
-            if (!supabase) {
-                showCustomModal('Koneksi Gagal', 'Supabase Client gagal diinisialisasi. Periksa kembali URL dan Kunci API Anda, atau coba muat ulang halaman.');
-                return;
-            }
+            if (!supabase) { showCustomModal('Koneksi Gagal', 'Supabase Client error.'); return; }
 
-            // Gunakan userId (UUID yang valid) untuk query
             const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-            if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
-                 console.error("Error fetching profile:", error);
-                 // Tampilkan pesan kesalahan hanya jika itu bukan kesalahan 'not found'
-                 if (error.code !== 'PGRST116') { 
-                     showCustomModal('Error', `Gagal mengambil data profil dari database. Error Code: ${error.code}`);
-                 }
-                 return;
-            }
+            if (error && error.code !== 'PGRST116') { showCustomModal('Error', `DB Error: ${error.code}`); return; }
             
             userProfile = data;
 
@@ -494,149 +464,88 @@
         }
         window.setRoleAndLogin = setRoleAndLogin;
         
-        // --- Navigation Logic (Dummy) ---
         function navigateToTab(tabId, viewId) {
             document.querySelectorAll(`#${viewId} .tab-content, #${viewId} .gurubk-tab-content`).forEach(el => el.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
-            document.querySelectorAll(`#mobile-nav button, #desktop-nav button`).forEach(btn => btn.classList.remove('bg-sky-500', 'text-white', 'bg-amber-500', 'text-gray-900'));
+            document.querySelectorAll(`#mobile-nav button, #desktop-nav button`).forEach(btn => btn.classList.remove('bg-sky-500', 'text-white', 'bg-amber-500', 'text-gray-900', 'bg-red-500', 'text-white'));
             
-            const roleClass = userRole === 'student' ? 'bg-sky-500 text-white' : 'bg-amber-500 text-gray-900';
-            // FIX: The classList.add method does not support adding multiple classes in one string.
-            // We need to split the string into an array and spread it as arguments.
+            let roleClass = userRole === 'student' ? 'bg-sky-500 text-white' : 'bg-amber-500 text-gray-900';
+            if (tabId === 'tab-complaints') roleClass = 'bg-red-500 text-white';
+
             const classesToAdd = roleClass.split(' ');
             document.querySelector(`[data-tab="${tabId}"]`)?.classList.add(...classesToAdd);
             lucide.createIcons();
         }
         window.navigateToTab = navigateToTab;
 
-        // --- Layout Loaders ---
         function loadStudentLayout() {
-            const navItems = [
-                { id: 'tab-about', icon: 'book-text', label: 'Tentang' }, // BARU
+            renderNav([
+                { id: 'tab-about', icon: 'book-text', label: 'Tentang' },
                 { id: 'tab-materi', icon: 'book-open', label: 'Materi' },
                 { id: 'tab-appointment', icon: 'calendar-check', label: 'Janji Temu' },
-                { id: 'tab-chat', icon: 'message-square', label: 'Chat & Masukan' }, // Label diubah
-            ];
-            
-            const createNavHtml = (item, isDesktop) => `
-                <button onclick="navigateToTab('${item.id}', 'student-view')" data-tab="${item.id}" class="w-full flex ${isDesktop ? 'items-center space-x-3 p-3 text-lg rounded-xl hover:bg-sky-50' : 'flex-col items-center justify-center p-2 text-xs transition duration-150'} text-gray-600">
-                    <i data-lucide="${item.icon}" class="${isDesktop ? 'w-6 h-6' : 'w-5 h-5'}"></i>
-                    <span class="${isDesktop ? 'font-medium' : 'mt-1'}">${item.label}</span>
-                </button>
-            `;
-
-            document.getElementById('mobile-nav').innerHTML = navItems.map(item => createNavHtml(item, false)).join('');
-            document.getElementById('desktop-nav').innerHTML = `
-                <div class="flex flex-col space-y-2 mt-4">
-                    ${navItems.map(item => createNavHtml(item, true)).join('')}
-                </div>
-                <div class="mt-auto pt-6 border-t border-gray-200">
-                    <button onclick="returnToRoleSelector()" class="w-full flex items-center space-x-3 p-3 text-lg rounded-xl text-red-600 hover:bg-red-50">
-                        <i data-lucide="log-out" class="w-6 h-6"></i>
-                        <span class="font-medium">Keluar</span>
-                    </button>
-                </div>
-            `;
-            navigateToTab('tab-about', 'student-view'); // Default tab diubah
+                { id: 'tab-complaints', icon: 'alert-triangle', label: 'Lapor/Keluhan' },
+                { id: 'tab-chat', icon: 'message-circle', label: 'Chat Privasi' }
+            ], 'student-view');
+            navigateToTab('tab-about', 'student-view');
         }
 
         function loadGuruBkLayout() {
-             const navItems = [
+            renderNav([
                 { id: 'tab-gurubk-appointments', icon: 'calendar-plus', label: 'Janji Temu' },
-                { id: 'tab-gurubk-chat', icon: 'inbox', label: 'Masukan Siswa' }, // Label diubah
-                { id: 'tab-gurubk-materi', icon: 'list-checks', label: 'Kelola Materi' },
-            ];
-            
-            const createNavHtml = (item, isDesktop) => `
-                <button onclick="navigateToTab('${item.id}', 'gurubk-view')" data-tab="${item.id}" class="w-full flex ${isDesktop ? 'items-center space-x-3 p-3 text-lg rounded-xl hover:bg-amber-50' : 'flex-col items-center justify-center p-2 text-xs transition duration-150'} text-gray-600">
-                    <i data-lucide="${item.icon}" class="${isDesktop ? 'w-6 h-6' : 'w-5 h-5'}"></i>
-                    <span class="${isDesktop ? 'font-medium' : 'mt-1'}">${item.label}</span>
-                </button>
-            `;
-
-            document.getElementById('mobile-nav').innerHTML = navItems.map(item => createNavHtml(item, false)).join('');
-            document.getElementById('desktop-nav').innerHTML = `
-                <div class="flex flex-col space-y-2 mt-4">
-                    ${navItems.map(item => createNavHtml(item, true)).join('')}
-                </div>
-                <div class="mt-auto pt-6 border-t border-gray-200">
-                    <button onclick="returnToRoleSelector()" class="w-full flex items-center space-x-3 p-3 text-lg rounded-xl text-red-600 hover:bg-red-50">
-                        <i data-lucide="log-out" class="w-6 h-6"></i>
-                        <span class="font-medium">Keluar</span>
-                    </button>
-                </div>
-            `;
+                { id: 'tab-gurubk-chat', icon: 'message-circle', label: 'Chat Siswa' },
+                { id: 'tab-gurubk-complaints', icon: 'alert-octagon', label: 'Kotak Keluhan' },
+                { id: 'tab-gurubk-materi', icon: 'list-checks', label: 'Kelola Materi' }
+            ], 'gurubk-view');
             navigateToTab('tab-gurubk-appointments', 'gurubk-view');
         }
 
         function loadAdminLayout() {
-             const navItems = [
-                { id: 'admin-view', icon: 'layout-dashboard', label: 'Dashboard' } // Admin view is one page
-            ];
-            
-            const createNavHtml = (item, isDesktop) => `
-                <button onclick="navigateToTab('${item.id}', 'admin-view')" data-tab="${item.id}" class="w-full flex ${isDesktop ? 'items-center space-x-3 p-3 text-lg rounded-xl hover:bg-gray-100' : 'flex-col items-center justify-center p-2 text-xs transition duration-150'} text-gray-600">
-                    <i data-lucide="${item.icon}" class="${isDesktop ? 'w-6 h-6' : 'w-5 h-5'}"></i>
-                    <span class="${isDesktop ? 'font-medium' : 'mt-1'}">${item.label}</span>
-                </button>
-            `;
-
-            document.getElementById('mobile-nav').innerHTML = navItems.map(item => createNavHtml(item, false)).join('');
-            document.getElementById('desktop-nav').innerHTML = `
-                <div class="flex flex-col space-y-2 mt-4">
-                    ${navItems.map(item => createNavHtml(item, true)).join('')}
-                </div>
-                <div class="mt-auto pt-6 border-t border-gray-200">
-                    <button onclick="returnToRoleSelector()" class="w-full flex items-center space-x-3 p-3 text-lg rounded-xl text-red-600 hover:bg-red-50">
-                        <i data-lucide="log-out" class="w-6 h-6"></i>
-                        <span class="font-medium">Keluar</span>
-                    </button>
-                </div>
-            `;
-            // Admin only has one main view, so it's always visible after login
+             renderNav([{ id: 'admin-view', icon: 'layout-dashboard', label: 'Dashboard' }], 'admin-view');
         }
         
-        // --- Data Form Handling (diubah untuk Supabase) ---
-        document.getElementById('student-info-form').addEventListener('submit', async (e) => {
+        function renderNav(navItems, viewId) {
+            const createNavHtml = (item, isDesktop) => `
+                <button onclick="navigateToTab('${item.id}', '${viewId}')" data-tab="${item.id}" class="w-full flex ${isDesktop ? 'items-center space-x-3 p-3 text-lg rounded-xl hover:bg-gray-100' : 'flex-col items-center justify-center p-2 text-xs transition duration-150'} text-gray-600">
+                    <i data-lucide="${item.icon}" class="${isDesktop ? 'w-6 h-6' : 'w-5 h-5'}"></i>
+                    <span class="${isDesktop ? 'mt-1 font-medium' : 'mt-1'}">${item.label}</span>
+                </button>
+            `;
+            document.getElementById('mobile-nav').innerHTML = navItems.map(item => createNavHtml(item, false)).join('');
+            document.getElementById('desktop-nav').innerHTML = `
+                <div class="flex flex-col space-y-2 mt-4">${navItems.map(item => createNavHtml(item, true)).join('')}</div>
+                <div class="mt-auto pt-6 border-t border-gray-200">
+                    <button onclick="returnToRoleSelector()" class="w-full flex items-center space-x-3 p-3 text-lg rounded-xl text-red-600 hover:bg-red-50"><i data-lucide="log-out" class="w-6 h-6"></i><span class="font-medium">Keluar</span></button>
+                </div>
+            `;
+        }
+        
+        const handleProfileSubmit = async (e, role, roleName) => {
             e.preventDefault();
-            const newProfile = { id: userId, full_name: document.getElementById('student-name').value.trim(), school: document.getElementById('student-school').value.trim(), major: document.getElementById('student-major').value.trim(), role: 'Siswa' };
-            
+            const inputs = e.target.querySelectorAll('input');
+            const newProfile = { id: userId, full_name: inputs[0].value.trim(), role: roleName };
+            if(role === 'student') { newProfile.school = inputs[1].value; newProfile.major = inputs[2].value; }
+            if(role === 'gurubk') { newProfile.phone_number = inputs[1].value; }
             const { data, error } = await supabase.from('profiles').insert(newProfile).select().single();
-            if (error) { console.error("Error creating student profile:", error); showCustomModal('Gagal Registrasi', 'Terjadi kesalahan saat menyimpan data profil.'); return; }
-            
+            if (error) { showCustomModal('Gagal', 'Error menyimpan profil.'); return; }
             userProfile = data;
             await proceedToApp();
-        });
+        };
 
-        document.getElementById('gurubk-info-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newProfile = { id: userId, full_name: document.getElementById('gurubk-name').value.trim(), phone_number: document.getElementById('gurubk-phone').value.trim(), role: 'Guru BK' };
-            const { data, error } = await supabase.from('profiles').insert(newProfile).select().single();
-            if (error) { console.error("Error creating BK profile:", error); showCustomModal('Gagal Registrasi', 'Terjadi kesalahan saat menyimpan data profil.'); return; }
-            userProfile = data;
-            await proceedToApp();
+        ['student', 'gurubk', 'admin'].forEach(r => {
+             const form = document.getElementById(`${r}-info-form`);
+             if(form) form.addEventListener('submit', (e) => handleProfileSubmit(e, r, r === 'gurubk' ? 'Guru BK' : (r === 'admin' ? 'Admin' : 'Siswa')));
         });
         
-        document.getElementById('admin-info-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const newProfile = { id: userId, full_name: document.getElementById('admin-name').value.trim(), role: 'Admin' };
-             const { data, error } = await supabase.from('profiles').insert(newProfile).select().single();
-            if (error) { console.error("Error creating Admin profile:", error); showCustomModal('Gagal Registrasi', 'Terjadi kesalahan saat menyimpan data profil.'); return; }
-            userProfile = data;
-            await proceedToApp();
-        });
-        
-        // --- Student Features (diubah untuk Supabase) ---
         async function loadInitialStudentData() {
             await fetchAndRenderMotivationalPosts();
             await fetchAndRenderAppointments();
-            // Tidak perlu render chat secara eksplisit, karena sudah ada listener realtime
+            await fetchAndRenderComplaints();
         }
         
         async function fetchAndRenderMotivationalPosts() {
-            const { data, error } = await supabase.from('motivational_posts').select('*').order('created_at', { ascending: false });
-            if (error) { console.error('Error fetching posts:', error); return; }
-            document.getElementById('motivational-posts-list').innerHTML = data.map(post => `<div class="bg-white p-6 rounded-2xl shadow-xl border-l-8 border-sky-400 hover:shadow-2xl transition duration-200"><h4 class="text-xl font-bold text-gray-800 mb-2">${post.title}</h4><p class="text-gray-600 mb-4 line-clamp-3">${post.content}</p><p class="text-xs text-sky-500 font-medium flex items-center"><i data-lucide="user-check" class="w-4 h-4 mr-1"></i>Oleh: ${post.author}</p></div>`).join('');
+            const { data } = await supabase.from('motivational_posts').select('*').order('created_at', { ascending: false });
+            if (!data) return;
+            document.getElementById('motivational-posts-list').innerHTML = data.map(post => `<div class="bg-white p-6 rounded-2xl shadow-xl border-l-8 border-sky-400 hover:shadow-2xl transition duration-200"><h4 class="text-xl font-bold text-gray-800 mb-2">${escapeHtml(post.title)}</h4><p class="text-gray-600 mb-4 line-clamp-3">${escapeHtml(post.content)}</p><p class="text-xs text-sky-500 font-medium flex items-center"><i data-lucide="user-check" class="w-4 h-4 mr-1"></i>Oleh: ${escapeHtml(post.author)}</p></div>`).join('');
             lucide.createIcons();
         }
         
@@ -644,109 +553,83 @@
             e.preventDefault();
             const newAppointment = { date: document.getElementById('appointment-date').value, time: document.getElementById('appointment-time').value, reason: document.getElementById('appointment-reason').value.trim(), student_id: userId, student_name: userProfile.full_name };
             const { error } = await supabase.from('appointments').insert(newAppointment);
-            if (error) { console.error('Error creating appointment:', error); showCustomModal('Gagal', 'Gagal mengirim permintaan.'); return; }
-            showCustomModal('Permintaan Terkirim!', 'Permintaan janji temu Anda berhasil dicatat. Guru BK akan segera mengonfirmasi jadwal Anda.');
-            e.target.reset();
+            if (!error) { showCustomModal('Terkirim', 'Permintaan janji temu berhasil dicatat.'); e.target.reset(); }
         });
 
         async function fetchAndRenderAppointments() {
-            const list = document.getElementById('appointments-list'), noApps = document.getElementById('no-appointments');
-            const { data, error } = await supabase.from('appointments').select('*').eq('student_id', userId).order('date', { ascending: false });
-            if (error) { console.error('Error fetching appointments:', error); return; }
-            
-            noApps.classList.toggle('hidden', data.length > 0);
-            list.innerHTML = data.map(app => `<div class="bg-white p-4 rounded-xl shadow-md border-l-8 ${app.status === 'Confirmed' ? 'border-green-500' : app.status === 'Rejected' ? 'border-red-500' : 'border-yellow-500'}"><div class="flex justify-between items-start"><p class="font-bold text-gray-800 text-lg">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-600 mt-2">Alasan: ${app.reason}</p><p class="text-xs text-gray-400 mt-2">Diajukan: ${new Date(app.created_at).toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' })}</p></div>`).join('');
+            const { data } = await supabase.from('appointments').select('*').eq('student_id', userId).order('date', { ascending: false });
+            if (!data) return;
+            const list = document.getElementById('appointments-list');
+            list.innerHTML = data.map(app => `<div class="bg-white p-4 rounded-xl shadow-md border-l-8 ${app.status === 'Confirmed' ? 'border-green-500' : app.status === 'Rejected' ? 'border-red-500' : 'border-yellow-500'}"><div class="flex justify-between items-start"><p class="font-bold text-gray-800 text-lg">${app.date} Pukul ${app.time}</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-600 mt-2">Alasan: ${escapeHtml(app.reason)}</p></div>`).join('');
+            document.getElementById('no-appointments').classList.toggle('hidden', data.length > 0);
         };
         
+        document.getElementById('complaint-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const category = document.getElementById('complaint-category').value;
+            const text = document.getElementById('complaint-text').value.trim();
+            const finalMessage = `${COMPLAINT_PREFIX} [${category}] ${text}`;
+            const { error } = await supabase.from('chat_messages').insert({ sender_id: userId, sender_name: userProfile.full_name, message: finalMessage, role: 'student' });
+            if (!error) { showCustomModal('Terkirim', 'Laporan dikirim rahasia.'); e.target.reset(); fetchAndRenderComplaints(); }
+        });
+
+        async function fetchAndRenderComplaints() {
+            const { data } = await supabase.from('chat_messages').select('*').eq('sender_id', userId).ilike('message', `${COMPLAINT_PREFIX}%`).order('created_at', {ascending: false});
+            const list = document.getElementById('complaints-history-list');
+            if(!data || data.length === 0) { list.innerHTML = ''; return; }
+            list.innerHTML = data.map(msg => {
+                const cleanMsg = msg.message.replace(COMPLAINT_PREFIX, '').trim();
+                return `<div class="bg-red-50 p-4 rounded-lg border border-red-200"><p class="font-bold text-red-800 text-sm mb-1">${new Date(msg.created_at).toLocaleDateString('id-ID')}</p><p class="text-gray-700">${escapeHtml(cleanMsg)}</p></div>`;
+            }).join('');
+        }
+
         document.getElementById('chat-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const chatInput = document.getElementById('chat-input');
             if (!chatInput.value.trim()) return;
-            const newMessage = { sender_id: userId, sender_name: userProfile.full_name, message: chatInput.value.trim(), role: 'student' };
-            // Tambahkan recipient_id ke pesan jika ingin diarahkan ke guru BK tertentu, untuk saat ini biarkan null
-            const { error } = await supabase.from('chat_messages').insert(newMessage);
-            if (error) { console.error('Error sending message:', error); return; }
-            chatInput.value = '';
+            const { error } = await supabase.from('chat_messages').insert({ sender_id: userId, sender_name: userProfile.full_name, message: chatInput.value.trim(), role: 'student' });
+            if (!error) chatInput.value = '';
         });
 
         async function renderChatMessages() {
-            // Dalam mode Siswa, hanya tampilkan pesan antara Siswa ini dan Guru BK (atau pesan yang tidak memiliki recipient_id)
-            const { data, error } = await supabase.from('chat_messages').select('*').or(`sender_id.eq.${userId},recipient_id.eq.${userId}`).order('created_at');
-            if (error) { console.error('Error fetching chat:', error); return; }
-
+            const { data } = await supabase.from('chat_messages').select('*').or(`sender_id.eq.${userId},recipient_id.eq.${userId}`).not('message', 'ilike', `${COMPLAINT_PREFIX}%`).order('created_at');
             const list = document.getElementById('chat-messages');
+            if (!data) return;
             list.innerHTML = data.map(msg => {
                 const isUser = msg.sender_id === userId; 
-                const timestamp = new Date(msg.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                return `<div class="max-w-[85%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm"><p>${!isUser ? `<span class="font-bold">Guru BK</span>: ` : ''}${msg.message}</p><p class="text-xs ${isUser ? 'text-sky-100' : 'text-amber-500'} text-right mt-1">${timestamp}</p></div>`;
+                return `<div class="max-w-[85%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm"><p>${!isUser ? `<span class="font-bold">Guru BK</span>: ` : ''}${escapeHtml(msg.message)}</p><p class="text-xs ${isUser ? 'text-sky-100' : 'text-amber-500'} text-right mt-1">${new Date(msg.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</p></div>`;
             }).join('');
             list.scrollTop = list.scrollHeight;
         };
         
-        // --- Guru BK Features (diubah untuk Supabase) ---
         async function loadInitialGuruBkData() {
             await fetchAndRenderGuruBkAppointments();
             await fetchAndRenderGurubkChatThreads();
+            await fetchAndRenderGurubkComplaints();
             await fetchAndRenderMateriManagementList();
-            listenToAllChanges(); // Pindah listener ke sini dan Initial Load
+            listenToAllChanges(); 
         }
 
         window.updateAppointmentStatus = async (docId, newStatus) => {
             const { error } = await supabase.from('appointments').update({ status: newStatus }).eq('id', docId);
-            if (error) { console.error('Error updating status:', error); return; }
-            showCustomModal('Aksi Berhasil', `Status Janji Temu diperbarui menjadi **${newStatus}**.`);
+            if (!error) showCustomModal('Berhasil', `Status diperbarui.`);
         };
 
         async function fetchAndRenderGuruBkAppointments() { 
-            const list = document.getElementById('gurubk-appointments-list'), noApps = document.getElementById('no-gurubk-appointments');
-            // Ambil semua janji temu, dan pisahkan yang masih pending untuk diletakkan di atas
-            const { data, error } = await supabase.from('appointments').select('*').order('status', { ascending: true }).order('created_at', { ascending: false });
-            if (error) { console.error('Error fetching BK appointments:', error); return; }
-            
-            noApps.classList.toggle('hidden', data.length > 0);
-            
-            list.innerHTML = data.map(app => {
-                const isPending = app.status === 'Pending';
-                // Gunakan properti 'id' yang merupakan integer atau UUID untuk tombol update
-                return `<div class="bg-white p-4 rounded-xl shadow-md border-l-8 ${isPending ? 'border-yellow-500' : app.status === 'Confirmed' ? 'border-green-500' : app.status === 'Rejected' ? 'border-red-500' : 'border-sky-500'} ${isPending ? 'border-2 border-yellow-200' : ''}">
-                    <div class="flex justify-between items-start">
-                        <p class="font-bold text-gray-800 text-lg">${app.student_name} (${app.status})</p>
-                        <span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span>
-                    </div>
-                    <p class="text-sm text-gray-600 mt-2">Waktu: ${app.date} Pukul ${app.time}</p>
-                    <p class="text-sm text-gray-600">Alasan: ${app.reason}</p>
-                    ${isPending ? 
-                        `<div class="flex space-x-2 mt-3">
-                            <button onclick="updateAppointmentStatus('${app.id}', 'Confirmed')" class="btn-primary bg-green-500 text-white text-xs px-3 py-1 rounded-lg hover:bg-green-600 transition">Konfirmasi</button>
-                            <button onclick="updateAppointmentStatus('${app.id}', 'Rejected')" class="btn-secondary bg-red-500 text-white text-xs px-3 py-1 rounded-lg hover:bg-red-600 transition">Tolak</button>
-                        </div>` : ''}
-                </div>`;
-            }).join('');
+            const { data } = await supabase.from('appointments').select('*').order('status', { ascending: true }).order('created_at', { ascending: false });
+            if(!data) return;
+            document.getElementById('gurubk-appointments-list').innerHTML = data.map(app => `<div class="bg-white p-4 rounded-xl shadow-md border-l-8 ${app.status === 'Pending' ? 'border-yellow-500' : app.status === 'Confirmed' ? 'border-green-500' : 'border-red-500'}"><div class="flex justify-between items-start"><p class="font-bold text-gray-800 text-lg">${escapeHtml(app.student_name)} (${app.status})</p><span class="status-${app.status} px-3 py-1 text-xs font-semibold rounded-full">${app.status}</span></div><p class="text-sm text-gray-600 mt-2">Waktu: ${app.date} Pukul ${app.time}</p><p class="text-sm text-gray-600">Alasan: ${escapeHtml(app.reason)}</p>${app.status === 'Pending' ? `<div class="flex space-x-2 mt-3"><button onclick="updateAppointmentStatus('${app.id}', 'Confirmed')" class="btn-primary bg-green-500 text-white text-xs px-3 py-1 rounded-lg">Konfirmasi</button><button onclick="updateAppointmentStatus('${app.id}', 'Rejected')" class="btn-secondary bg-red-500 text-white text-xs px-3 py-1 rounded-lg">Tolak</button></div>` : ''}</div>`).join('');
+            document.getElementById('no-gurubk-appointments').classList.toggle('hidden', data.length > 0);
         }
 
+        // FIX: Menggunakan JSON.stringify untuk memastikan nama siswa aman saat disalurkan ke modal
         async function openChatReplyModal(studentId, studentName) {
             currentChatStudentId = studentId;
             document.getElementById('chat-reply-student-name').textContent = studentName;
-
-            // 1. Ambil pesan chat spesifik
-            const { data, error } = await supabase.from('chat_messages').select('*').or(`sender_id.eq.${studentId},recipient_id.eq.${studentId}`).order('created_at');
-            if (error) { console.error('Error fetching specific chat:', error); return; }
-
-            // 2. Render pesan
+            const { data } = await supabase.from('chat_messages').select('*').or(`sender_id.eq.${studentId},recipient_id.eq.${studentId}`).not('message', 'ilike', `${COMPLAINT_PREFIX}%`).order('created_at');
             const list = document.getElementById('gurubk-specific-chat-messages');
-            list.innerHTML = data.map(msg => {
-                const isUser = msg.sender_id === studentId;
-                const roleLabel = isUser ? msg.sender_name : 'Anda (Guru BK)'; 
-                const timestamp = new Date(msg.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-                
-                return `<div class="max-w-[85%] ${isUser ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm">
-                    <p class="font-semibold mb-1">${roleLabel}</p>
-                    <p>${msg.message}</p>
-                    <p class="text-xs ${isUser ? 'text-sky-100' : 'text-amber-500'} text-right mt-1">${timestamp}</p>
-                </div>`;
-            }).join('');
+            list.innerHTML = data.map(msg => `<div class="max-w-[85%] ${msg.sender_id === studentId ? 'chat-message-user ml-auto' : 'chat-message-bk mr-auto'} p-3 text-sm"><p class="font-semibold mb-1">${msg.sender_id === studentId ? msg.sender_name : 'Anda'}</p><p>${escapeHtml(msg.message)}</p></div>`).join('');
             list.scrollTop = list.scrollHeight;
-            lucide.createIcons();
             document.getElementById('chat-reply-modal').classList.remove('hidden');
         }
         window.openChatReplyModal = openChatReplyModal;
@@ -755,300 +638,231 @@
             e.preventDefault();
             const replyInput = document.getElementById('gurubk-chat-reply-input');
             if (!replyInput.value.trim() || !currentChatStudentId) return;
-
-            const newMessage = { 
-                sender_id: userId, 
-                sender_name: userProfile.full_name, 
-                message: replyInput.value.trim(), 
-                role: 'gurubk', 
-                recipient_id: currentChatStudentId // Kirim balasan ke Siswa yang sedang chatting
-            };
-            
-            const { error } = await supabase.from('chat_messages').insert(newMessage);
-            if (error) { console.error('Error sending reply:', error); return; }
-            
-            replyInput.value = '';
-            // Refresh modal untuk menampilkan pesan baru
-            openChatReplyModal(currentChatStudentId, document.getElementById('chat-reply-student-name').textContent);
+            const { error } = await supabase.from('chat_messages').insert({ sender_id: userId, sender_name: userProfile.full_name, message: replyInput.value.trim(), role: 'gurubk', recipient_id: currentChatStudentId });
+            if (!error) { replyInput.value = ''; openChatReplyModal(currentChatStudentId, document.getElementById('chat-reply-student-name').textContent); }
         });
 
+        // FIX: Menggunakan JSON.stringify untuk memastikan nama siswa aman saat disalurkan ke fungsi onclick
         async function fetchAndRenderGurubkChatThreads() {
-            // Dapatkan semua pesan untuk mengelompokkannya berdasarkan pengirim
-            const { data, error } = await supabase.from('chat_messages').select('*').order('created_at', { ascending: false });
-            if (error) { console.error('Error fetching chat threads:', error); return; }
-
+            const { data } = await supabase.from('chat_messages').select('*').not('message', 'ilike', `${COMPLAINT_PREFIX}%`).order('created_at', { ascending: false });
+            if(!data) return;
             const threadsMap = {};
             data.forEach(msg => {
                 const threadId = msg.role === 'student' ? msg.sender_id : msg.recipient_id;
-                const studentName = msg.role === 'student' ? msg.sender_name : (msg.recipient_id === userId ? msg.sender_name : 'Siswa Lain');
-
-                if (!threadsMap[threadId]) {
-                    threadsMap[threadId] = {
-                        student_id: threadId,
-                        student_name: studentName,
-                        last_message: msg.message,
-                        last_message_time: new Date(msg.created_at),
-                        is_new: msg.role === 'student' // Asumsi pesan dari siswa adalah 'baru'
-                    };
-                }
+                const name = msg.role === 'student' ? msg.sender_name : (msg.recipient_id === userId ? msg.sender_name : 'Siswa');
+                if (threadId && !threadsMap[threadId]) threadsMap[threadId] = { student_id: threadId, student_name: name, last_message: msg.message, last_message_time: new Date(msg.created_at) };
             });
-
-            const threads = Object.values(threadsMap).sort((a, b) => b.last_message_time - a.last_message_time);
-            const list = document.getElementById('gurubk-chat-threads');
-            const noThreads = document.getElementById('no-chat-threads');
-            
-            noThreads.classList.toggle('hidden', threads.length > 0);
-            
-            list.innerHTML = threads.map(thread => `
-                <div onclick="openChatReplyModal('${thread.student_id}', '${thread.student_name}')" class="bg-white p-4 rounded-xl shadow-md border-l-8 border-amber-400 hover:bg-amber-50 cursor-pointer transition">
-                    <div class="flex justify-between items-start">
-                        <p class="font-bold text-gray-800 text-lg">${thread.student_name}</p>
-                        <span class="text-xs text-gray-500">${thread.last_message_time.toLocaleDateString('id-ID')}</span>
-                    </div>
-                    <p class="text-sm text-gray-600 mt-1 line-clamp-1">${thread.last_message}</p>
-                </div>
-            `).join('');
+            const threads = Object.values(threadsMap);
+            document.getElementById('gurubk-chat-threads').innerHTML = threads.map(thread => `<div onclick="openChatReplyModal('${thread.student_id}', ${JSON.stringify(thread.student_name)})" class="bg-white p-4 rounded-xl shadow-md border-l-8 border-amber-400 hover:bg-amber-50 cursor-pointer transition"><div class="flex justify-between items-start"><p class="font-bold text-gray-800 text-lg">${escapeHtml(thread.student_name)}</p><span class="text-xs text-gray-500">${thread.last_message_time.toLocaleDateString('id-ID')}</span></div><p class="text-sm text-gray-600 mt-1 line-clamp-1">${escapeHtml(thread.last_message)}</p></div>`).join('');
+            document.getElementById('no-chat-threads').classList.toggle('hidden', threads.length > 0);
         }
         
+        async function fetchAndRenderGurubkComplaints() {
+            const { data } = await supabase.from('chat_messages').select('*').ilike('message', `${COMPLAINT_PREFIX}%`).order('created_at', { ascending: false });
+            const list = document.getElementById('gurubk-complaints-list');
+            if(!data) return;
+            // FIX: Menggunakan JSON.stringify untuk memastikan nama siswa aman saat disalurkan ke fungsi onclick
+            list.innerHTML = data.map(msg => `<div class="bg-red-50 p-4 rounded-xl shadow-md border-l-8 border-red-500"><div class="flex justify-between mb-2"><span class="font-bold text-red-800">${escapeHtml(msg.sender_name)}</span><span class="text-xs text-gray-500">${new Date(msg.created_at).toLocaleDateString('id-ID')}</span></div><p class="text-gray-800 text-sm font-medium bg-white p-3 rounded-lg border border-red-100">${escapeHtml(msg.message.replace(COMPLAINT_PREFIX, '').trim())}</p><div class="mt-2 text-right"><button onclick="openChatReplyModal('${msg.sender_id}', ${JSON.stringify(msg.sender_name)})" class="text-xs text-sky-600 underline font-bold">Balas via Chat Pribadi</button></div></div>`).join('');
+            document.getElementById('no-complaints-threads').classList.toggle('hidden', data.length > 0);
+        }
+
         document.getElementById('materi-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('materi-id').value;
             const title = document.getElementById('materi-title').value.trim();
             const content = document.getElementById('materi-content').value.trim();
-            
             const postData = { title, content, author: userProfile.full_name };
             
             let error;
-            if (id) {
-                // Edit
-                ({ error } = await supabase.from('motivational_posts').update(postData).eq('id', id));
-                showCustomModal('Berhasil', 'Materi berhasil diperbarui!');
-            } else {
-                // Tambah Baru
-                ({ error } = await supabase.from('motivational_posts').insert(postData));
-                showCustomModal('Berhasil', 'Materi baru berhasil ditambahkan!');
-            }
+            if (id) ({ error } = await supabase.from('motivational_posts').update(postData).eq('id', id));
+            else ({ error } = await supabase.from('motivational_posts').insert(postData));
 
-            if (error) { console.error('Error saving materi:', error); showCustomModal('Gagal', 'Gagal menyimpan materi.'); return; }
-            e.target.reset();
-            document.getElementById('materi-id').value = '';
-            document.getElementById('materi-submit-btn').textContent = 'Tambah Materi';
+            if (!error) {
+                showCustomModal('Berhasil', 'Materi disimpan.');
+                resetMateriForm();
+            }
         });
 
-        window.editMateri = (id, title, content) => {
-            // Mengganti quotes agar aman dimasukkan ke string HTML
-            const safeTitle = title.replace(/'/g, "\\'").replace(/"/g, '\\"');
-            const safeContent = content.replace(/'/g, "\\'").replace(/"/g, '\\"');
-
-            document.getElementById('materi-id').value = id;
-            document.getElementById('materi-title').value = safeTitle;
-            document.getElementById('materi-content').value = safeContent;
-            document.getElementById('materi-submit-btn').textContent = 'Perbarui Materi';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
+        // Fungsi Edit Materi yang Aman (Hanya Passing ID)
+        window.triggerEditMateri = (id) => {
+            // Cari data di cache memori berdasarkan ID
+            const post = materiDataCache.find(p => p.id === id);
+            if (post) {
+                document.getElementById('materi-id').value = post.id;
+                document.getElementById('materi-title').value = post.title;
+                document.getElementById('materi-content').value = post.content;
+                document.getElementById('materi-submit-btn').textContent = 'Perbarui Materi';
+                document.getElementById('materi-cancel-btn').classList.remove('hidden');
+            }
+        }
         
-        window.deleteMateri = async (id) => {
-            // Gunakan modal kustom daripada confirm()
-            showCustomModal('Konfirmasi Hapus', `Anda yakin ingin menghapus materi ID: **${id}**?`, true); // Tanda true untuk konfirmasi
-            document.getElementById('modal-close-btn').textContent = 'Batalkan';
-            
-            const deleteAction = async () => {
-                const { error } = await supabase.from('motivational_posts').delete().eq('id', id);
-                document.getElementById('modal-close-btn').onclick = () => document.getElementById('custom-modal').classList.add('hidden'); // Reset close action
-                if (error) { console.error('Error deleting materi:', error); showCustomModal('Gagal', 'Gagal menghapus materi.'); return; }
-                showCustomModal('Berhasil', 'Materi berhasil dihapus!');
-            };
-            
-            // Tambahkan tombol konfirmasi
-            const modalMessageEl = document.getElementById('modal-message');
-            const confirmBtn = document.createElement('button');
-            confirmBtn.textContent = 'Ya, Hapus';
-            confirmBtn.className = 'w-full bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 shadow-md mt-3';
-            confirmBtn.onclick = () => { deleteAction(); document.getElementById('custom-modal').classList.add('hidden'); };
-            
-            const closeBtn = document.getElementById('modal-close-btn');
-            closeBtn.parentNode.insertBefore(confirmBtn, closeBtn);
-            closeBtn.onclick = () => { confirmBtn.remove(); document.getElementById('custom-modal').classList.add('hidden'); };
+        window.resetMateriForm = () => {
+             document.getElementById('materi-form').reset();
+             document.getElementById('materi-id').value = '';
+             document.getElementById('materi-submit-btn').textContent = 'Tambah Materi';
+             document.getElementById('materi-cancel-btn').classList.add('hidden');
+        }
+
+        // Mengganti confirm() dengan showConfirmationModal()
+        window.deleteMateri = (id) => {
+            showConfirmationModal(
+                'Hapus Materi',
+                'Apakah Anda yakin ingin menghapus materi motivasi ini?',
+                async () => {
+                    const { error } = await supabase.from('motivational_posts').delete().eq('id', id);
+                    if (!error) {
+                        showCustomModal('Berhasil', 'Materi berhasil dihapus.');
+                        fetchAndRenderMateriManagementList(); // Refresh list
+                    } else {
+                        showCustomModal('Gagal', 'Gagal menghapus materi.');
+                    }
+                }
+            );
         };
 
         async function fetchAndRenderMateriManagementList() {
-            const list = document.getElementById('gurubk-materi-list'), noMateri = document.getElementById('no-gurubk-materi');
-            const { data, error } = await supabase.from('motivational_posts').select('*').order('created_at', { ascending: false });
-            if (error) { console.error('Error fetching management posts:', error); return; }
+            const { data } = await supabase.from('motivational_posts').select('*').order('created_at', { ascending: false });
+            if (!data) return;
+            // Simpan data ke cache global
+            materiDataCache = data;
             
-            noMateri.classList.toggle('hidden', data.length > 0);
-            
-            list.innerHTML = data.map(post => {
-                // Sanitasi konten untuk mencegah kerusakan string pada pemanggilan fungsi
-                const safeTitle = post.title.replace(/'/g, "\\'").replace(/"/g, '\\"');
-                const safeContent = post.content.replace(/'/g, "\\'").replace(/"/g, '\\"');
-                
+            document.getElementById('gurubk-materi-list').innerHTML = data.map(post => {
                 return `<div class="bg-white p-4 rounded-xl shadow-md border-l-8 border-sky-400">
-                    <h4 class="text-xl font-bold text-gray-800 mb-1">${post.title}</h4>
-                    <p class="text-gray-600 text-sm line-clamp-2">${post.content}</p>
+                    <h4 class="text-xl font-bold text-gray-800 mb-1">${escapeHtml(post.title)}</h4>
+                    <p class="text-gray-600 text-sm line-clamp-2">${escapeHtml(post.content)}</p>
                     <div class="flex space-x-2 mt-3">
-                        <button onclick="editMateri(${post.id}, '${safeTitle}', '${safeContent}')" class="btn-primary bg-sky-500 text-white text-xs px-3 py-1 rounded-lg hover:bg-sky-600 transition flex items-center"><i data-lucide="pen-tool" class="w-4 h-4 mr-1"></i>Edit</button>
-                        <button onclick="deleteMateri(${post.id})" class="btn-secondary bg-red-500 text-white text-xs px-3 py-1 rounded-lg hover:bg-red-600 transition flex items-center"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i>Hapus</button>
+                        <!-- Panggil fungsi edit hanya dengan ID -->
+                        <button onclick="triggerEditMateri(${post.id})" class="btn-primary bg-sky-500 text-white text-xs px-3 py-1 rounded-lg">Edit</button>
+                        <button onclick="deleteMateri(${post.id})" class="btn-secondary bg-red-500 text-white text-xs px-3 py-1 rounded-lg">Hapus</button>
                     </div>
                 </div>`;
             }).join('');
-            lucide.createIcons();
+            document.getElementById('no-gurubk-materi').classList.toggle('hidden', data.length > 0);
         }
 
-        // --- Admin Features ---
         async function renderAdminDashboard() {
-            const { data: profiles, error: err1 } = await supabase.from('profiles').select('*');
-            const { data: appointments, error: err2 } = await supabase.from('appointments').select('*');
-            const { data: chats, error: err3 } = await supabase.from('chat_messages').select('sender_id, role'); // Ambil data chat
+            const { data: profiles } = await supabase.from('profiles').select('*');
+            const { data: appointments } = await supabase.from('appointments').select('*');
+            const { data: chats } = await supabase.from('chat_messages').select('*');
             
-            if (err1 || err2 || err3) { console.error("Error fetching admin data:", err1 || err2 || err3); return; }
+            adminDataCache = { profiles: profiles || [], appointments: appointments || [], chats: chats || [] };
 
-            // Simpan data ke cache
-            adminDataCache.profiles = profiles || [];
-            adminDataCache.appointments = appointments || [];
-            adminDataCache.chats = chats || [];
-
-            // Statistik (menggunakan data cache)
             const students = adminDataCache.profiles.filter(p => p.role === 'Siswa').length;
-            const totalAppointments = adminDataCache.appointments.length;
-            const pendingAppointments = adminDataCache.appointments.filter(a => a.status === 'Pending').length;
+            const complaints = adminDataCache.chats.filter(c => c.message.includes(COMPLAINT_PREFIX)).length;
             
+            const activityLog = [];
+            adminDataCache.appointments.forEach(a => activityLog.push({ type: 'Janji Temu', user: a.student_name, time: new Date(a.created_at), detail: 'Membuat janji temu' }));
+            adminDataCache.chats.forEach(c => {
+                if(c.role === 'student') activityLog.push({ type: c.message.includes(COMPLAINT_PREFIX) ? 'Keluhan' : 'Chat', user: c.sender_name, time: new Date(c.created_at), detail: c.message.includes(COMPLAINT_PREFIX) ? 'Mengirim keluhan' : 'Mengirim pesan' });
+            });
+            activityLog.sort((a,b) => b.time - a.time);
+            document.getElementById('stat-activity').textContent = activityLog.length;
             document.getElementById('stat-students').textContent = students;
-            document.getElementById('stat-appointments').textContent = totalAppointments;
-            document.getElementById('stat-pending').textContent = pendingAppointments;
+            document.getElementById('stat-appointments').textContent = adminDataCache.appointments.length;
+            document.getElementById('stat-complaints').textContent = complaints;
 
-            // Daftar Pengguna (menggunakan data cache)
-            const userListHtml = adminDataCache.profiles.map(p => `
-                <div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center shadow-sm">
-                    <div>
-                        <p class="font-semibold text-gray-800">${p.full_name}</p>
-                        <p class="text-sm text-gray-500">${p.role}</p>
-                    </div>
-                    <span class="text-xs font-mono text-gray-400">${p.id.substring(0, 8)}...</span>
-                </div>
-            `).join('');
-            document.getElementById('admin-users-list').innerHTML = userListHtml;
-
-            // Daftar Semua Janji Temu (menggunakan data cache)
-            const allAppsListHtml = adminDataCache.appointments.map(app => `
-                 <div class="bg-white p-3 rounded-xl shadow-sm border-l-4 ${app.status === 'Confirmed' ? 'border-green-500' : app.status === 'Rejected' ? 'border-red-500' : 'border-yellow-500'}">
-                    <p class="font-bold text-gray-800 text-sm">${app.student_name} (<span class="status-${app.status} text-xs font-semibold rounded-full">${app.status}</span>)</p>
-                    <p class="text-xs text-gray-600">Pada: ${app.date} Pukul ${app.time}</p>
-                </div>
-            `).join('');
-            document.getElementById('admin-all-appointments-list').innerHTML = allAppsListHtml;
-
+            // FIX: Menggunakan JSON.stringify untuk memastikan nama user aman saat disalurkan ke fungsi onclick
+            document.getElementById('admin-users-list').innerHTML = adminDataCache.profiles.map(p => `<div class="p-3 bg-gray-50 rounded-lg flex justify-between items-center shadow-sm"><div><p class="font-semibold text-gray-800">${escapeHtml(p.full_name)}</p><p class="text-sm text-gray-500">${p.role}</p></div><button onclick="adminDeleteUser('${p.id}', ${JSON.stringify(p.full_name)})" class="text-red-500 hover:text-red-700 bg-red-100 p-2 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`).join('');
+            document.getElementById('admin-activity-list').innerHTML = activityLog.slice(0, 50).map(log => `<div class="flex items-center space-x-3 p-2 border-b border-gray-100"><div class="w-2 h-2 rounded-full ${log.type === 'Keluhan' ? 'bg-red-500' : log.type === 'Janji Temu' ? 'bg-amber-500' : 'bg-sky-500'}"></div><div class="flex-1"><p class="text-gray-800 font-medium"><span class="font-bold">${escapeHtml(log.user)}</span> ${log.detail}</p><p class="text-xs text-gray-500">${log.time.toLocaleString('id-ID')}</p></div></div>`).join('');
             lucide.createIcons();
         }
+
+        // Mengganti confirm() dengan showConfirmationModal()
+        window.adminDeleteUser = (targetId, name) => {
+            showConfirmationModal(
+                'Hapus Akun', 
+                `Apakah Anda yakin ingin menghapus akun ${name} secara permanen?`,
+                async () => {
+                    const { error } = await supabase.from('profiles').delete().eq('id', targetId);
+                    if (!error) {
+                        showCustomModal('Berhasil', `Akun ${name} berhasil dihapus.`);
+                        renderAdminDashboard();
+                    } else {
+                        showCustomModal('Gagal', 'Gagal menghapus akun.');
+                    }
+                }
+            );
+        };
         
-        window.viewSystemReport = () => {
-             // 1. Tampilkan modal loading
-             showCustomModal('Memproses Laporan', 'Sedang mengumpulkan data dan membuat file CSV... Harap tunggu.');
+        // Fungsi Download Laporan
+        window.downloadAdminReport = async () => {
+             showCustomModal('Memproses', 'Mengunduh data terbaru untuk laporan...');
              
              try {
-                // 2. Akses data dari cache
-                const { profiles, appointments, chats } = adminDataCache;
+                // Ambil data terbaru langsung dari server untuk memastikan kelengkapan
+                const { data: profiles } = await supabase.from('profiles').select('*');
+                const { data: appointments } = await supabase.from('appointments').select('*');
+                const { data: chats } = await supabase.from('chat_messages').select('*');
+                
+                if (!profiles || !appointments || !chats) throw new Error("Gagal mengambil data");
 
                 const students = profiles.filter(p => p.role === 'Siswa');
 
-                // 3. Buat header CSV
-                let csvContent = "data:text/csv;charset=utf-8,";
-                csvContent += "Nama Siswa,Sekolah,Jurusan/Kelas,Total Janji Temu,Total Pesan Terkirim\r\n";
-
-                // 4. Proses data dan tambahkan baris untuk setiap siswa
-                students.forEach(student => {
-                    const studentId = student.id;
+                const reportData = students.map(student => {
+                    const studentApps = appointments.filter(a => a.student_id === student.id);
+                    const studentChats = chats.filter(c => c.sender_id === student.id && c.role === 'student');
+                    const studentComplaints = studentChats.filter(c => c.message.includes(COMPLAINT_PREFIX));
                     
-                    // Hitung janji temu
-                    const appointmentCount = appointments.filter(a => a.student_id === studentId).length;
-                    
-                    // Hitung pesan terkirim (hanya yang dikirim oleh siswa)
-                    const chatCount = chats.filter(c => c.sender_id === studentId && c.role === 'student').length;
-                    
-                    // Tambahkan baris ke CSV (handle kutip untuk data string)
-                    csvContent += `"${student.full_name}","${student.school || ''}","${student.major || ''}",${appointmentCount},${chatCount}\r\n`;
+                    return {
+                        "ID": student.id,
+                        "Nama Lengkap": student.full_name,
+                        "Sekolah": student.school || '-',
+                        "Jurusan": student.major || '-',
+                        "Total Janji": studentApps.length,
+                        "Janji Ditolak": studentApps.filter(a => a.status === 'Rejected').length,
+                        "Total Chat": studentChats.length - studentComplaints.length,
+                        "Total Keluhan": studentComplaints.length,
+                        "Terakhir Login": "Aktif"
+                    };
                 });
 
-                // 5. Buat link downloader dan picu unduhan
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "laporan_detail_siswa.csv");
-                document.body.appendChild(link); // Diperlukan untuk Firefox
+                const ws = XLSX.utils.json_to_sheet(reportData);
+                
+                // Atur lebar kolom agar rapi saat dibuka di Excel
+                const wscols = [{wch:30}, {wch:20}, {wch:20}, {wch:15}, {wch:10}, {wch:10}, {wch:10}, {wch:10}, {wch:10}];
+                ws['!cols'] = wscols;
 
-                link.click(); // Klik link
-                document.body.removeChild(link); // Hapus link
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Laporan Siswa");
+                
+                // Tambahkan Timestamp agar nama file unik
+                const date = new Date().toISOString().slice(0,10);
+                XLSX.writeFile(wb, `Laporan_BK_${date}.xlsx`);
 
-                // 6. Tampilkan modal sukses
-                showCustomModal('Laporan Selesai', 'File `laporan_detail_siswa.csv` telah berhasil diunduh.');
-
+                showCustomModal('Selesai', 'File Excel berhasil diunduh. Silakan buka file tersebut.');
              } catch (error) {
-                console.error("Error generating report:", error);
-                showCustomModal('Gagal Membuat Laporan', 'Terjadi kesalahan saat membuat file CSV. Silakan cek konsol.');
+                console.error("Excel Error:", error);
+                showCustomModal('Gagal', 'Gagal membuat file Excel. Pastikan koneksi internet stabil.');
              }
         };
 
-
-        // --- Realtime Subscriptions ---
         function listenToAllChanges() {
-             supabase.channel('public:appointments').on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, payload => {
-                if(userRole === 'student') fetchAndRenderAppointments();
-                if(userRole === 'gurubk') fetchAndRenderGuruBkAppointments();
-                if(userRole === 'admin') renderAdminDashboard();
-            }).subscribe();
-
-            supabase.channel('public:chat_messages').on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, payload => {
-                if(userRole === 'student') renderChatMessages();
+             supabase.channel('public:all').on('postgres_changes', { event: '*', schema: 'public', table: '*' }, payload => {
+                if(userRole === 'student') { fetchAndRenderAppointments(); renderChatMessages(); fetchAndRenderComplaints(); }
                 if(userRole === 'gurubk') {
-                    if (currentChatStudentId) {
-                        // Refresh modal jika Guru BK sedang berada di chat ini
-                        const studentName = document.getElementById('chat-reply-student-name').textContent;
-                        openChatReplyModal(currentChatStudentId, studentName);
-                    }
-                    fetchAndRenderGurubkChatThreads();
+                     fetchAndRenderGuruBkAppointments(); fetchAndRenderGurubkChatThreads(); fetchAndRenderGurubkComplaints();
+                     if (currentChatStudentId) openChatReplyModal(currentChatStudentId, document.getElementById('chat-reply-student-name').textContent);
                 }
-                if(userRole === 'admin') renderAdminDashboard(); // Perbarui cache jika ada chat baru
-            }).subscribe();
-            
-            supabase.channel('public:motivational_posts').on('postgres_changes', { event: '*', schema: 'public', table: 'motivational_posts' }, payload => {
-                if(userRole === 'student') fetchAndRenderMotivationalPosts();
-                if(userRole === 'gurubk') fetchAndRenderMateriManagementList();
-            }).subscribe();
-            
-            // Listener untuk perubahan profil (misalnya, registrasi baru)
-            supabase.channel('public:profiles').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, payload => {
                 if(userRole === 'admin') renderAdminDashboard();
             }).subscribe();
         }
 
-        // --- Initial Load ---
         document.addEventListener('DOMContentLoaded', async () => {
-            // Restore session if exists
             const savedRole = localStorage.getItem('bkApp_userRole');
             const savedId = localStorage.getItem('bkApp_userId');
-            
             if (savedRole && savedId && supabase) {
                 userRole = savedRole;
                 userId = savedId;
                 const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
                 userProfile = data;
-                if (userProfile) {
-                    await proceedToApp();
-                } else {
-                     document.getElementById('role-selector').classList.remove('hidden');
-                }
+                if (userProfile) await proceedToApp();
+                else document.getElementById('role-selector').classList.remove('hidden');
             } else {
                  document.getElementById('role-selector').classList.remove('hidden');
             }
             lucide.createIcons();
-
-            if(supabase) {
-                listenToAllChanges();
-            } else {
-                 showCustomModal('Peringatan Database', 'Supabase Client tidak diinisialisasi. Aplikasi akan berjalan, tetapi fitur login dan database tidak akan berfungsi.');
-            }
+            if(supabase) listenToAllChanges();
         });
-        
     </script>
 </body>
 </html>
